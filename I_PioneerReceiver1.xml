@@ -5,102 +5,27 @@
     </settings>
 
     <functions>
-        local ipAddress
+    local p
+	
+	function startup(lul_device)
+		luup.log("Pioneer plugin: loading library L_Pioneer ...")
+		if (package.path:find ("/etc/cmh-ludl/?.lua;/etc/cmh-lu/?.lua", 1, true) == nil) then
+			package.path = package.path .. ";/etc/cmh-ludl/?.lua;/etc/cmh-lu/?.lua"
+		end
 
-        local mappingTable = {
-        ["InputSelection1"] = {
-            ["DiscreteinputCable"] = "05FN",    -- TV/SAT
-            ["DiscreteinputCD1"] = "01FN",      -- CD
-            ["DiscreteinputCD2"] = "01FN",      -- CD
-            ["DiscreteinputCDR"] = "03FN",      -- CD-R/TAPE
-            ["DiscreteinputDAT"] = "03FN",      -- CD-R/TAPE
-            ["DiscreteinputDVD"] = "04FN",      -- DVD
-            ["DiscreteinputDVI"] = "19FN",      -- HDMI1
-            ["DiscreteinputHDTV"] = "05FN",     -- TV/SAT
-            ["DiscreteinputLD"] = "00FN",       -- PHONO
-            ["DiscreteinputMD"] = "03FN",       -- CD-R/TAPE
-            ["DiscreteinputPC"] = "26FN",       -- HOME MEDIA GALLERY(Internet Radio)
-            ["DiscreteinputPVR"] = "15FN",      -- DVR/BDR
-            ["DiscreteinputTV"] = "05FN",       -- TV/SAT
-            ["DiscreteinputVCR"] = "10FN",      -- VIDEO 1(VIDEO)
-            ["Input1"] = "10FN",                -- VIDEO 1(VIDEO)
-            ["Input2"] = "14FN",                -- VIDEO 2
-            ["Input3"] = "19FN",                -- HDMI1
-            ["Input4"] = "20FN",                -- HDMI2
-            ["Input5"] = "21FN",                -- HDMI3
-            ["Input6"] = "22FN",                -- HDMI4
-            ["Input7"] = "23FN",                -- HDMI5
-            ["Input8"] = "24FN",                -- HDMI6
-            ["Input9"] = "25FN",                -- BD
-            ["Input10"] = "17FN",               -- iPod/USB
-            ["Source"] = "FU",                  -- INPUT CHANGE (cyclic)
-            ["ToggleInput"] = "FU",             -- INPUT CHANGE (cyclic)
-            },
-        ["DiscretePower1"] = {
-            ["Off"] = "PF",                     -- POWER OFF
-            ["On"] = "PO",                      -- POWER ON
-            },
-        ["MenuNavigation1"] = {
-            ["Back"] = "CRT",                   -- AMP RETURN
-            ["Down"] = "CDN",                   -- AMP CURSOR DOWN
-            ["Exit"] = "CRT",                   -- AMP RETURN
-            ["Left"] = "CLE",                   -- AMP CURSOR LEFT
-            ["Menu"] = "HM",                    -- HOME MENU
-            ["Right"] = "CRI",                  -- AMP CURSOR RIGHT
-            ["Select"] = "CEN",                 -- AMP CURSOR ENTER
-            ["Up"] = "CUP",                     -- AMP CURSOR UP
-            },
-        ["Volume1"] = {
-            ["Down"] = "VD",                    -- VOLUME DOWN
-            ["Mute"] = "MZ",                    -- MUTE ON/OFF
-            ["Up"] = "VU",                      -- VOLUME UP
-            },
-        }
+		package.loaded.L_PioneerReceiver = nil
+		p = require("L_PioneerReceiver")
+		if (package.loaded.L_PioneerReceiver == nil)
+		then
+			luup.log("PioneerReceiver plugin: plugin is not installed correctly. Library L_PioneerReceiver cannot be loaded.", 1)
+			luup.task("Plugin not correctly installed", 2, "PioneerReceiver plugin", -1)
+			return false
+		end
 
+		luup.log("PioneerReceiver plugin: library L_PioneerReceiver loaded")
 
-        -- -------------------------------------------------------------------------
-        -- Perform the startup for the receiver (i.e. open the telnet port)
-        
-        function doStartup(lul_device)
-            local TELNET_PORT = 23
-            ipAddress = luup.devices[lul_device].ip
-
-            if (ipAddress ~= "") then
-                luup.log("Running Network Attached I_PioneerReceiver1.xml on " .. ipAddress)
-                luup.io.open(lul_device, ipAddress, TELNET_PORT)
-            else
-                luup.log("Running Serial Attached I_PioneerReceiver1.xml - THIS IS UNTESTED")
-            end
-        end
-        
-        -- -------------------------------------------------------------------------
-        -- Perform the appropriate action based on the mapping table for this action
-        
-        function doAction(deviceType, actionName)
-            local code = mappingTable[deviceType][actionName];
-            
-            local CR = string.char(13)
-
-            -- Do we have a code?
-            if( code ~= "") then
-            
-                -- Wake up the receiver if it is in standby mode.                  
-                luup.io.write(CR)
-
-                -- Send the code to the receiver
-                if( false == luup.io.write(code .. CR)) then
-                    luup.log("io.write error in action: " .. deviceType .. "-" .. actionName .. " code:" .. code, 1)
-                    luup.set_failure(true)
-                    return false
-                end
-            else
-                luup.log("Unimplemented action: " .. deviceType .. "-" .. actionName, 1)
-                luup.set_failure(true)
-                return false
-            end
-            
-            return true
-        end
+		return p.startup(lul_device)
+	end
         
     </functions>
 
@@ -108,14 +33,33 @@
     <incoming>
         <lua>
             local response = tostring(lul_data)
-
-            luup.log("Response:" .. response)
+            luup.log("Response:" .. response)	
         </lua>
     </incoming>
 
-    <startup>doStartup</startup>
+    <startup>startup</startup>
 
     <actionList>
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:PioneerReceiver1</serviceId>
+            <name>MyAction</name>
+            <job>
+                local actionParm = lul_settings.ActionParm
+                if (actionParm ~= nil) then
+					-- do stuff here for the job
+					luup.log("Pioneer plugin: MyAction "..actionParm )
+                end
+				-- return status
+				--job_None=-1, // no icon
+				--job_WaitingToStart=0, // gray icon
+				--job_InProgress=1, // blue icon
+				--job_Error=2, // red icon
+				--job_Aborted=3, // red icon
+				--job_Done=4, // green icon
+				--job_WaitingForCallback=5 // blue icon - Special case used in certain derived classes
+                return 4,0
+            </job>
+        </action>	
         <action>
             <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
             <name>DiscreteinputCable</name>
