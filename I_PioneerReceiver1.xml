@@ -1,0 +1,431 @@
+<?xml version="1.0"?>
+<implementation>
+    <settings>
+        <protocol>cr</protocol>
+    </settings>
+
+    <functions>
+        local ipAddress
+
+        local mappingTable = {
+        ["InputSelection1"] = {
+            ["DiscreteinputCable"] = "05FN",    -- TV/SAT
+            ["DiscreteinputCD1"] = "01FN",      -- CD
+            ["DiscreteinputCD2"] = "01FN",      -- CD
+            ["DiscreteinputCDR"] = "03FN",      -- CD-R/TAPE
+            ["DiscreteinputDAT"] = "03FN",      -- CD-R/TAPE
+            ["DiscreteinputDVD"] = "04FN",      -- DVD
+            ["DiscreteinputDVI"] = "19FN",      -- HDMI1
+            ["DiscreteinputHDTV"] = "05FN",     -- TV/SAT
+            ["DiscreteinputLD"] = "00FN",       -- PHONO
+            ["DiscreteinputMD"] = "03FN",       -- CD-R/TAPE
+            ["DiscreteinputPC"] = "26FN",       -- HOME MEDIA GALLERY(Internet Radio)
+            ["DiscreteinputPVR"] = "15FN",      -- DVR/BDR
+            ["DiscreteinputTV"] = "05FN",       -- TV/SAT
+            ["DiscreteinputVCR"] = "10FN",      -- VIDEO 1(VIDEO)
+            ["Input1"] = "10FN",                -- VIDEO 1(VIDEO)
+            ["Input2"] = "14FN",                -- VIDEO 2
+            ["Input3"] = "19FN",                -- HDMI1
+            ["Input4"] = "20FN",                -- HDMI2
+            ["Input5"] = "21FN",                -- HDMI3
+            ["Input6"] = "22FN",                -- HDMI4
+            ["Input7"] = "23FN",                -- HDMI5
+            ["Input8"] = "24FN",                -- HDMI6
+            ["Input9"] = "25FN",                -- BD
+            ["Input10"] = "17FN",               -- iPod/USB
+            ["Source"] = "FU",                  -- INPUT CHANGE (cyclic)
+            ["ToggleInput"] = "FU",             -- INPUT CHANGE (cyclic)
+            },
+        ["DiscretePower1"] = {
+            ["Off"] = "PF",                     -- POWER OFF
+            ["On"] = "PO",                      -- POWER ON
+            },
+        ["MenuNavigation1"] = {
+            ["Back"] = "CRT",                   -- AMP RETURN
+            ["Down"] = "CDN",                   -- AMP CURSOR DOWN
+            ["Exit"] = "CRT",                   -- AMP RETURN
+            ["Left"] = "CLE",                   -- AMP CURSOR LEFT
+            ["Menu"] = "HM",                    -- HOME MENU
+            ["Right"] = "CRI",                  -- AMP CURSOR RIGHT
+            ["Select"] = "CEN",                 -- AMP CURSOR ENTER
+            ["Up"] = "CUP",                     -- AMP CURSOR UP
+            },
+        ["Volume1"] = {
+            ["Down"] = "VD",                    -- VOLUME DOWN
+            ["Mute"] = "MZ",                    -- MUTE ON/OFF
+            ["Up"] = "VU",                      -- VOLUME UP
+            },
+        }
+
+
+        -- -------------------------------------------------------------------------
+        -- Perform the startup for the receiver (i.e. open the telnet port)
+        
+        function doStartup(lul_device)
+            local TELNET_PORT = 23
+            ipAddress = luup.devices[lul_device].ip
+
+            if (ipAddress ~= "") then
+                luup.log("Running Network Attached I_PioneerReceiver1.xml on " .. ipAddress)
+                luup.io.open(lul_device, ipAddress, TELNET_PORT)
+            else
+                luup.log("Running Serial Attached I_PioneerReceiver1.xml - THIS IS UNTESTED")
+            end
+        end
+        
+        -- -------------------------------------------------------------------------
+        -- Perform the appropriate action based on the mapping table for this action
+        
+        function doAction(deviceType, actionName)
+            local code = mappingTable[deviceType][actionName];
+            
+            local CR = string.char(13)
+
+            -- Do we have a code?
+            if( code ~= "") then
+            
+                -- Wake up the receiver if it is in standby mode.                  
+                luup.io.write(CR)
+
+                -- Send the code to the receiver
+                if( false == luup.io.write(code .. CR)) then
+                    luup.log("io.write error in action: " .. deviceType .. "-" .. actionName .. " code:" .. code, 1)
+                    luup.set_failure(true)
+                    return false
+                end
+            else
+                luup.log("Unimplemented action: " .. deviceType .. "-" .. actionName, 1)
+                luup.set_failure(true)
+                return false
+            end
+            
+            return true
+        end
+        
+    </functions>
+
+    -- -------------------------------------------------------------------------
+    <incoming>
+        <lua>
+            local response = tostring(lul_data)
+
+            luup.log("Response:" .. response)
+        </lua>
+    </incoming>
+
+    <startup>doStartup</startup>
+
+    <actionList>
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputCable</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputCable")
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputCD1</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputCD1")
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputCD2</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputCD2")
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputCDR</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputCDR")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputDAT</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputDAT")
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputDVD</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputDVD")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputDVI</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputDVI")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputHDTV</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputHDTV")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputLD</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputLD")
+            </run>
+        </action>
+		
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputMD</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputMD")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputPC</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputPC")
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputPVR</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputPVR")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputTV</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputTV")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputVCR</name>
+            <run>
+                doAction("InputSelection1", "DiscreteinputVCR")
+            </run>
+        </action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input1</name>
+            <run>
+                doAction("InputSelection1", "Input1")
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input2</name>
+            <run>
+                doAction("InputSelection1", "Input2")
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input3</name>
+            <run>
+                doAction("InputSelection1", "Input3")
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input4</name>
+            <run>
+                doAction("InputSelection1", "Input4")
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input5</name>
+            <run>
+                doAction("InputSelection1", "Input5")
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input6</name>
+            <run>
+                doAction("InputSelection1", "Input6")
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input7</name>
+            <run>
+                doAction("InputSelection1", "Input7")
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input8</name>
+            <run>
+                doAction("InputSelection1", "Input8")
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input9</name>
+            <run>
+                doAction("InputSelection1", "Input9")
+            </run>
+		</action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>Input10</name>
+            <run>
+                doAction("InputSelection1", "Input10")
+            </run>
+        </action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Source</name>
+            <run>
+                doAction("InputSelection1", "Source")
+            </run>
+		</action>
+
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>ToggleInput</name>
+            <run>
+                doAction("InputSelection1", "ToggleInput")
+            </run>
+		</action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:DiscretePower1</serviceId>
+            <name>Off</name>
+            <run>
+                doAction("DiscretePower1", "Off")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:DiscretePower1</serviceId>
+            <name>On</name>
+            <run>
+                doAction("DiscretePower1", "On")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Back</name>
+            <run>
+                doAction("MenuNavigation1", "Back")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Down</name>
+            <run>
+                doAction("MenuNavigation1", "Down")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Exit</name>
+            <run>
+                doAction("MenuNavigation1", "Exit")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Left</name>
+            <run>
+                doAction("MenuNavigation1", "Left")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Menu</name>
+            <run>
+                doAction("MenuNavigation1", "Menu")
+            </run>
+
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Right</name>
+            <run>
+                doAction("MenuNavigation1", "Right")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Select</name>
+            <run>
+                doAction("MenuNavigation1", "Select")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Up</name>
+            <run>
+                doAction("MenuNavigation1", "Up")
+            </run> 
+       </action>
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:Volume1</serviceId>
+            <name>Down</name>
+            <run>
+                doAction("Volume1", "Down")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:Volume1</serviceId>
+            <name>Mute</name>
+            <run>
+                doAction("Volume1", "Mute")
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:Volume1</serviceId>
+            <name>Up</name>
+            <run>
+                doAction("Volume1", "Up")
+            </run>
+        </action>
+    </actionList>
+</implementation>
