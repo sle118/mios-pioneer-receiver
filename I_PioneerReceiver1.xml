@@ -8,21 +8,21 @@
     local p
 	
 	function startup(lul_device)
-		luup.log("Pioneer plugin: loading library L_Pioneer ...")
+		luup.log("Pioneer plugin: loading library L_Pioneer1 ...")
 		if (package.path:find ("/etc/cmh-ludl/?.lua;/etc/cmh-lu/?.lua", 1, true) == nil) then
 			package.path = package.path .. ";/etc/cmh-ludl/?.lua;/etc/cmh-lu/?.lua"
 		end
 
-		package.loaded.L_PioneerReceiver = nil
-		p = require("L_PioneerReceiver")
-		if (package.loaded.L_PioneerReceiver == nil)
+		package.loaded.L_PioneerReceiver1 = nil
+		p = require("L_PioneerReceiver1")
+		if (package.loaded.L_PioneerReceiver1 == nil)
 		then
-			luup.log("PioneerReceiver plugin: plugin is not installed correctly. Library L_PioneerReceiver cannot be loaded.", 1)
+			luup.log("PioneerReceiver plugin: plugin is not installed correctly. Library L_PioneerReceiver1 cannot be loaded.", 1)
 			luup.task("Plugin not correctly installed", 2, "PioneerReceiver plugin", -1)
 			return false
 		end
 
-		luup.log("PioneerReceiver plugin: library L_PioneerReceiver loaded")
+		luup.log("PioneerReceiver plugin: library L_PioneerReceiver1 loaded")
 
 		return p.startup(lul_device)
 	end
