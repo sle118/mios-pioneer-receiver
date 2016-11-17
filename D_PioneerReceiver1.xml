@@ -26,7 +26,11 @@
         <serviceId>urn:micasaverde-com:serviceId:DiscretePower1</serviceId>
         <SCPDURL>S_DiscretePower1.xml</SCPDURL>
       </service>
-
+	  <service>
+        <serviceType>urn:schemas-micasaverde-com:service:PioneerReceiver:1</serviceType>
+        <serviceId>urn:micasaverde-com:serviceId:PioneerReceiver1</serviceId>
+        <SCPDURL>S_PioneerReceiver1.xml</SCPDURL>
+      </service>
       <service>
         <serviceType>urn:micasaverde-com:service:InputSelection:1</serviceType>
         <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
