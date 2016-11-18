@@ -50,13 +50,13 @@
 					luup.log("Pioneer plugin: MyAction "..actionParm )
                 end
 				-- return status
-				--job_None=-1, // no icon
-				--job_WaitingToStart=0, // gray icon
-				--job_InProgress=1, // blue icon
-				--job_Error=2, // red icon
-				--job_Aborted=3, // red icon
-				--job_Done=4, // green icon
-				--job_WaitingForCallback=5 // blue icon - Special case used in certain derived classes
+				--job_None=-1,  no icon
+				--job_WaitingToStart=0,  gray icon
+				--job_InProgress=1,  blue icon
+				--job_Error=2,  red icon
+				--job_Aborted=3,  red icon
+				--job_Done=4,  green icon
+				--job_WaitingForCallback=5  blue icon - Special case used in certain derived classes 
                 return 4,0
             </job>
         </action>	

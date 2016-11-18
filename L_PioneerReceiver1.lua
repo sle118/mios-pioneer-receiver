@@ -55,27 +55,26 @@ local mappingTable = {
 		["Up"] = "VU",                      -- VOLUME UP
 		},
 	["Query"]  = {
-	    -- display info text
-		["POWER"]=			{"command"="?P"    ,"var"="power"},
-		["VOLUME"]=			{"command"="?V"    ,"var"="volume"},
-		["MUTE"]=			{"command"="?M"    ,"var"="mute"},
-		["LISTENING_MODE"]=	{"command"="?L"    ,"var"="listening_mode"},
-		["DISPLAY_INFO"]=	{"command"="?FL"   ,"var"="display_info"},
-		["TUNER_PRESET"]=	{"command"="?TP"   ,"var"="tuner_preset"},
-		["ZONE3_MUTE"]=		{"command"="?Z3M"  ,"var"="zone3_mute"},
-		["ZONE3_VOLUME"]=	{"command"="?YV"   ,"var"="zone3_volume"},
-		["ZONE3_INPUT"]=	{"command"="?ZT"   ,"var"="zone3_input"},
-		["ZONE3_POWER"]=	{"command"="?BP"   ,"var"="zone3_power""},
-		["ZONE2_MUTE"]=		{"command"="?Z2M"  ,"var"="zone2_mute"},
-		["ZONE2_VOLUME"]=	{"command"="?ZV"   ,"var"="zone2_volume"},
-		["ZONE2_INPUT"]=	{"command"="?ZS"   ,"var"="zone2_input"},
-		["ZONE2_POWER"]=	{"command"="?AP"   ,"var"="zone2_power"},
-		["SOURCE_QUERY"]=	{"command"="?F"    ,"var"="source_query"},
-		["TUNER_FREQ_AM"]=	{"command"="?FR"   ,"var"="tuner_freq_am"},
-		["TUNER_FREQ_FM"]=	{"command"="?FR"   ,"var"="tuner_freq_fm"},
-		["TREBLE"]=			{"command"="?TR"   ,"var"="treble"},
-		["BASS"]=			{"command"="?BA"   ,"var"="bass"},
-		["TONE"]=			{"command"="?TO"   ,"var"="tone"}
+		["POWER"] = {"command"="?P","var"="power"},
+		["VOLUME"] =	{"command"="?V","var"="volume"},
+		["MUTE"] = {"command"="?M","var"="mute"},
+		["LISTENING_MODE"] = {"command"="?L","var"="listening_mode"},
+		["DISPLAY_INFO"] = {"command"="?FL","var"="display_info"},
+		["TUNER_PRESET"] = {"command"="?TP","var"="tuner_preset"},
+		["ZONE3_MUTE"]=	{"command"="?Z3M","var"="zone3_mute"},
+		["ZONE3_VOLUME"]={"command"="?YV","var"="zone3_volume"},
+		["ZONE3_INPUT"]={"command"="?ZT","var"="zone3_input"},
+		["ZONE3_POWER"]={"command"="?BP","var"="zone3_power""},
+		["ZONE2_MUTE"]={"command"="?Z2M","var"="zone2_mute"},
+		["ZONE2_VOLUME"]={"command"="?ZV","var"="zone2_volume"},
+		["ZONE2_INPUT"]={"command"="?ZS","var"="zone2_input"},
+		["ZONE2_POWER"]={"command"="?AP","var"="zone2_power"},
+		["SOURCE_QUERY"]={"command"="?F","var"="source_query"},
+		["TUNER_FREQ_AM"]={"command"="?FR","var"="tuner_freq_am"},
+		["TUNER_FREQ_FM"]={"command"="?FR","var"="tuner_freq_fm"},
+		["TREBLE"]={"command"="?TR","var"="treble"},
+		["BASS"]={"command"="?BA","var"="bass"},
+		["TONE"]={"command"="?TO","var"="tone"}
 	}
 }
 
