@@ -1,0 +1,495 @@
+<?xml version="1.0"?>
+<implementation>
+    <settings>
+        <protocol>cr</protocol>
+    </settings>
+
+    <functions>
+    local p
+	local serviceName = 'urn:micasaverde-com:serviceId:PioneerReceiver1'
+	local job_WaitingToStart = 0 -- =job_WaitingToStart: In vera's UI a job in this state is 
+								-- displayed as a gray icon. It means it's waiting to start. 
+								-- If you return this value your 'job' code will be run again 
+								-- in the 'timeout' seconds
+	local job_Error = 2 
+	local job_Aborted = 3 		-- In vera's UI a job in this state (2 or 3) is displayed as a red icon. This means the job failed. Your code won't be run again.
+	local job_Done = 4 			-- In vera's UI a job in this state is displayed as a green icon. This means the job finished ok. Your code won't be run again.
+	local job_WaitingForCallback = 5-- In vera's UI a job in this state is displayed as a moving blue icon. This means the job is running and you're waiting for return data. 
+								-- Any data that comes in while the job is in this state will go to the lua code in the job's 'incoming' tag. If no data comes in before 
+								-- the number of seconds you return in the timeout, then the code in the job's 'timeout' tag is run.	
+
+    function parameter_changed(lul_DeviceNum,lul_Service,lul_Variable,lul_OldValue,lul_NewValue)
+        p.parameter_changed(lul_DeviceNum,lul_Service,lul_Variable,lul_OldValue,lul_NewValue)
+	end	
+
+	function startup(lul_device)
+		luup.log("Pioneer plugin: loading library L_Pioneer1 ...")
+		if (package.path:find ("/etc/cmh-ludl/?.lua;/etc/cmh-lu/?.lua", 1, true) == nil) then
+			package.path = package.path .. ";/etc/cmh-ludl/?.lua;/etc/cmh-lu/?.lua"
+		end
+
+		package.loaded.L_PioneerReceiver1 = nil
+		p = require("L_PioneerReceiver1")
+		package.loaded.L_PioneerReceiverFormats = nil
+		
+		if (package.loaded.L_PioneerReceiver1 == nil)
+		then
+			luup.log("PioneerReceiver plugin: plugin is not installed correctly. Library L_PioneerReceiver1 cannot be loaded.", 1)
+			luup.task("Plugin not correctly installed", 2, "PioneerReceiver plugin", -1)
+			return false
+		end
+		return p.startup(lul_device, serviceName)
+	end
+        local function rewrite_action(lul_device,lul_settings,action_name)
+        		local new_settings = lul_settings
+        		new_settings.value = lul_settings.action
+        		-- now overwrite action!
+            	new_settings.action = action_name
+            	
+                return p.queueAction(lul_device,true,new_settings)
+        end
+    </functions>
+
+    -- -------------------------------------------------------------------------
+    <incoming>
+        <lua>
+			-- ***** doc 
+			-- ***** end doc 
+			-- ***** doc 
+			-- Wrapper : function incoming(lul_device, lul_settings, lul_job, lul_data)
+			--	  luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue) .. ' job ID#: ' .. lul_job .. " received data: " .. lul_data)
+			--	  -- 4 = jobDone
+			--	  -- nil = n/a on the timeout since the job is done
+			--	  -- true = the incoming data was for us
+			--	  return 4, nil, true
+			--  end			
+			-- ***** end doc 	
+			
+			-- lul_settings is an object like below 
+			-- ["command"]="?P"    ,["var"]="power"
+			-- or ["Down"] = "VD"				
+			return p.process_response(lul_device, lul_settings, lul_job, lul_data)
+				
+            --p.process_response(tostring(lul_data),lul_device)
+            --luup.log("Pioneer : Response:" .. response)	
+        </lua>
+    </incoming>
+
+    <startup>startup</startup>
+
+    <actionList>
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:PioneerReceiver1</serviceId>
+            <name>processQueue</name>
+            <run>
+				-- ***** doc 
+				-- wrapper is 
+				-- function run(lul_device, lul_settings)
+			    -- 		luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue))
+				-- 		return false -- function failed
+				-- end
+				-- ***** end doc 
+				-- luup.log('PioneerReceiver processQueue run')
+            </run>
+			<job>
+				-- ***** doc 
+				-- wrapper is 
+				-- function job(lul_device, lul_settings, lul_job) 
+				-- 		luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue) .. ' job ID#: ' .. lul_job)
+				-- 		-- 5 = job_WaitingForCallback
+				-- 		-- and we'll wait 10 seconds for incoming data
+				-- 		return 5, 10
+				-- end
+				-- ***** end doc
+				if(p) then  return p.process_queue(lul_device,lul_settings,lul_job) else return job_WaitingToStart,1 end
+								
+			</job>
+			<timeout>
+				-- OpenLuup does not support this
+				-- ***** doc 
+				-- wrapper is 
+				-- function timeout(lul_device, lul_settings, lul_job) 
+				-- 		luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue) .. ' job ID#: ' .. lul_job)
+				-- 		5 = job_WaitingForCallback
+				-- 		and we'll wait 10 seconds for incoming data
+				-- 		return 5, 10
+				-- end
+				-- ***** end doc 
+				-- ["command"]="?P"    ,["var"]="power"
+				-- or ["Down"] = "VD"
+				--p.log('Timeout reached',p.tracelevel.DEBUG)
+				--luup.log('PioneerReceiver processQueue Timeout reached')
+				--return job_WaitingToStart,.1,true
+			</timeout>
+			<incoming>
+				-- OpenLuup does not support this
+				-- ***** doc 
+				-- ***** end doc 
+				-- ***** doc 
+				-- Wrapper : function incoming(lul_device, lul_settings, lul_job, lul_data)
+				--	  luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue) .. ' job ID#: ' .. lul_job .. " received data: " .. lul_data)
+				--	  -- 4 = jobDone
+				--	  -- nil = n/a on the timeout since the job is done
+				--	  -- true = the incoming data was for us
+				--	  return 4, nil, true
+				--  end			
+				-- ***** end doc 	
+
+			</incoming>
+			</action>
+          	<action>
+			<serviceId>urn:micasaverde-com:serviceId:PioneerReceiver1</serviceId>
+			<name>MuteOff</name>
+			<run>
+				if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+			</run>
+			</action>  			
+          	<action>
+			<serviceId>urn:micasaverde-com:serviceId:PioneerReceiver1</serviceId>
+			<name>MuteOn</name>
+			<run>
+				if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+			</run>
+			</action>  			
+          	<action>
+			<serviceId>urn:micasaverde-com:serviceId:PioneerReceiver1</serviceId>
+			<name>SetVolumePct</name>
+			<run>
+				if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+			</run>
+			</action>       			
+        	<action>
+			<serviceId>urn:upnp-org:serviceId:SwitchPower1</serviceId>
+			<name>SetTarget</name>
+			<run>
+				if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+			</run>
+		</action>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:SwitchPower1</serviceId>
+			<name>GetTarget</name>
+			<run>
+				if(p) then return p.get_service_variabble(lul_device, "Target",  lul_settings) else return job_WaitingToStart,1 end
+			</run>
+		</action>
+		<action>
+			<serviceId>urn:upnp-org:serviceId:SwitchPower1</serviceId>
+			<name>GetStatus</name>
+			<run>
+				if(p) then return p.get_service_variabble(lul_device, "Status",  lul_settings) else return job_WaitingToStart,1 end
+			</run>
+		</action>
+		<action>
+			<serviceId>urn:micasaverde-com:serviceId:DiscretePower1</serviceId>
+			<name>Off</name>
+			<run>
+				if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+			</run>
+		</action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:DiscretePower1</serviceId>
+            <name>On</name>
+            <run>
+            	if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputCable</name>
+            <run>
+            	if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputCD1</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputCD2</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputCDR</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputDAT</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputDVD</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputDVI</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputHDTV</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputLD</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+		
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputMD</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputPC</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputPVR</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputTV</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>DiscreteinputVCR</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input1</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input2</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input3</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input4</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input5</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input6</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input7</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input8</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Input9</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+        
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+            <name>Input10</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+		
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>Source</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+
+		<action>
+            <serviceId>urn:micasaverde-com:serviceId:InputSelection1</serviceId>
+		    <name>ToggleInput</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+		</action>
+
+
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Back</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Down</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Exit</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Left</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Menu</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Right</name>
+            <run>
+               if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Select</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:MenuNavigation1</serviceId>
+            <name>Up</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run> 
+       </action>
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:Volume1</serviceId>
+            <name>Down</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:Volume1</serviceId>
+            <name>Mute</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+
+        <action>
+            <serviceId>urn:micasaverde-com:serviceId:Volume1</serviceId>
+            <name>Up</name>
+            <run>
+                if(p) then return p.queueAction(lul_device,true,lul_settings)   else return job_WaitingToStart,1 end
+            </run>
+        </action>
+    </actionList>
+</implementation>

@@ -1,0 +1,626 @@
+{
+	"default_icon": "http://i.imgur.com/yfGnAQa.png",
+	"state_icons": [
+		{
+			"img": "http://i.imgur.com/AGM0jaf.png",
+			"conditions": [
+				{
+					"service": "urn:upnp-org:serviceId:SwitchPower1",
+					"variable": "Status",
+					"operator": "==",
+					"value": 1,
+					"subcategory_num": 0
+				},
+				{
+					"service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+					"variable": "Mute",
+					"operator": "==",
+					"value": "Off",
+					"subcategory_num": 0
+				}
+			]
+		},
+		{
+			"img": "http://i.imgur.com/HCKZwwV.png",
+			"conditions": [
+				{
+					"service": "urn:upnp-org:serviceId:SwitchPower1",
+					"variable": "Status",
+					"operator": "==",
+					"value": 1,
+					"subcategory_num": 0
+				},
+				{
+					"service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+					"variable": "Mute",
+					"operator": "==",
+					"value": "On",
+					"subcategory_num": 0
+				}
+			]
+		},
+		{
+			"img": "http://i.imgur.com/yfGnAQa.png",
+			"conditions": [
+				{
+					"service": "urn:upnp-org:serviceId:SwitchPower1",
+					"variable": "Status",
+					"operator": "==",
+					"value": 0,
+					"subcategory_num": 0
+				}
+			]
+		}
+	],
+	"inScene": 1,
+	"Tabs": [
+		{
+			"Label": {
+				"lang_tag": "ui7_tabname_control",
+				"text": "Control"
+			},
+			"Position": 0,
+			"TabType": "flash",
+			"top_navigation_tab": "1",
+			"SceneGroup": [
+				{
+					"id": 1,
+			       	"top": 0,
+       				"left": 0
+				}
+			],
+			"ControlGroup": [
+				{
+					"id": 1,
+					"SceneGroup": 1,
+					"isSingle": 1
+				}
+			],
+			"Control": [
+			{
+					"ControlGroup":"1",
+					"ControlType": "variable",
+					"top": "0",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:altui1",
+						"Variable": "DisplayLine1",
+						"Top": 85,
+						"Left": 10,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+				{
+					"ControlGroup":"1",
+					"ControlType": "variable",
+					"top": "1",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:altui1",
+						"Variable": "DisplayLine2",
+						"Top": 95,
+						"Left": 10,
+						"Width": 75,
+						"Height": 20
+					}
+				},
+			{
+					"ControlGroup": 1,
+					"ControlType": "multi_state_button",
+					"states": [
+						
+						{
+							"ControlCode": "pioneer2_on",
+							"Label": {
+								"lang_tag": "ui7_on",
+								"text": "ON"
+							},
+							"Display": {
+								"Service": "urn:upnp-org:serviceId:SwitchPower1",
+								"Variable": "Status",
+								"Value": 1
+							},
+							"Command": {
+								"Service": "urn:upnp-org:serviceId:SwitchPower1",
+								"Action": "SetTarget",
+								"Parameters": [
+									{
+										"Name": "newTargetValue",
+										"Value": 1
+									}
+								]
+							}
+						},
+						{
+							"ControlCode": "pioneer2_off",
+							"Label": {
+								"lang_tag": "ui7_off",
+								"text": "OFF"
+							},
+							"Display": {
+								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+								"Variable": "Status",
+								"Value": 0
+							},
+							"Command": {
+								"Service": "urn:upnp-org:serviceId:SwitchPower1",
+								"Action": "SetTarget",
+								"Parameters": [
+									{
+										"Name": "newTargetValue",
+										"Value": 0
+									}
+								]
+							}
+						}
+					],
+					"Display": {
+						"Top": 0,
+						"Left": 0
+					}
+				},
+				{
+				"ControlGroup": 1,
+					"ControlType": "multi_state_button",
+					"states": [
+						
+						{
+							"ControlCode": "pioneer2_muteon",
+							"Label": {
+								"lang_tag": "pioneer2_muteon",
+								"text": "MUTE ON"
+							},
+							"Display": {
+								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+								"Variable": "Mute",
+								"Value": "On"
+							},
+							"Command": {
+								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+								"Action": "MuteOn",
+								"Parameters": ""
+								}
+						},
+						{
+							"ControlCode": "pioneer2_muteoff",
+							"Label": {
+								"lang_tag": "pioneer2_muteoff",
+								"text": "MUTE OFF"
+							},
+							"Display": {
+								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+								"Variable": "Mute",
+								"Value": "Off"
+							},
+							"Command": {
+								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+								"Action": "MuteOff",
+								"Parameters": ""
+								}
+						}
+					],
+					"Display": {
+						"Top": 0,
+						"Left": 150
+					}
+				},
+			
+				{
+					"ControlGroup": "1",
+					"ControlType": "label",
+					"text_align": "left",
+					"Label": {
+						"lang_tag": "pioneerreceiver_last_unknown_msg",
+						"text": "Last Unknown Message"
+					},
+					"Display": {
+                        "Top": 45,
+                        "Left": 10
+                    }
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "variable",
+					"text_align": "left",
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+						"Variable": "LastUnknownMessage",
+                        "Top": 45,
+                        "Left": 250
+					}
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "label",
+					"text_align": "left",
+					"Label": {
+						"lang_tag": "pioneerreceiver_listeningmode",
+						"text": "Mode"
+					},
+					"Display": {
+						"Top": 55,
+						"Left": 10
+					}
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "variable",
+					"text_align": "left",
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+						"Variable": "ListeningMode",
+						"Top": 55,
+						"Left": 250
+					}
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "label",
+					"text_align": "left",
+					"Label": {
+						"lang_tag": "pioneer_receiver_source",
+						"text": "Source"
+					},
+					"Display": {
+						"Top": 65,
+						"Left": 10
+					}
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "variable",
+					"text_align": "left",
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+						"Variable": "Source",
+						"Top": 65,
+						"Left": 250
+					}
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "line_break"
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "label",
+					"text_align": "left",
+					"Label": {
+						"lang_tag": "pioneer_receiver_mute",
+						"text": "Mute"
+					},
+					"Display": {
+						"Top": 75,
+						"Left": 10
+					}
+				},
+				{
+					"ControlGroup": 1,
+					"ControlType": "variable",
+					"text_align": "left",
+					"Display": {
+						"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+						"Variable": "Mute",
+						"Top": 75,
+						"Left": 250
+					}
+				}
+			]
+		},
+		{
+			"Label": {
+				"lang_tag": "pioneer_receiver_pos1",
+				"text": "Pos1"
+			},
+			"Position": 1,
+			"top_navigation_tab": 1,
+			"TabType": "javascript",
+			"ScriptName": "J_RulesEngine1.js",
+			"Function": "RulesEngine.showRules"
+		},
+		{
+			"Label": {
+				"lang_tag": "pioneer_receiver_pos2",
+				"text": "Pos2"
+			},
+			"Position": 2,
+			"top_navigation_tab": 1,
+			"TabType": "javascript",
+			"ScriptName": "J_RulesEngine1.js",
+			"Function": "RulesEngine.showErrors"
+		},
+		{
+			"Label": {
+				"lang_tag": "donate",
+				"text": "Donate"
+			},
+			"Position": 3,
+			"top_navigation_tab": 1,
+			"TabType": "javascript",
+			"ScriptName": "J_RulesEngine1.js",
+			"Function": "RulesEngine.showDonate"
+		},
+		{
+			"Label": {
+				"lang_tag": "advanced",
+				"text": "Advanced"
+			},
+			"Position": 4,
+			"TabType": "javascript",
+			"ScriptName": "shared.js",
+			"Function": "advanced_device"
+		}
+	],
+	
+	"eventList2": [
+		{
+			"id": 1,
+			"label": {
+				"lang_tag": "pioneer_receiver_muted",
+				"text": "Whenever _DEVICE_NAME_ is muted"
+			},
+			"serviceId": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+			"serviceStateTable": {
+				"Mute": {
+					"value": "On",
+					"comparisson": "="
+				}
+			}
+		},
+		{
+			"id": 2,
+			"label": {
+				"lang_tag": "pioneer_receiver_unmuted",
+				"text": "Whenever _DEVICE_NAME_ is unmuted"
+			},
+			"serviceId": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+			"serviceStateTable": {
+				"Mute": {
+					"value": "On",
+					"comparisson": "="
+				}
+			}
+		},
+		{
+			"id": 2,
+			"label": {
+				"lang_tag": "pioneer_receiver_unmuted",
+				"text": "Whenever _DEVICE_NAME_ is unmuted"
+			},
+			"serviceId": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+			"serviceStateTable": {
+				"Mute": {
+					"value": "On",
+					"comparisson": "="
+				}
+			}
+		},
+
+		{
+			"id": 3,
+			"label": {
+				"lang_tag": "pioneer_receiver_input_is",
+				"text": "Input is"
+			},
+			"serviceId": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+			"argumentList": [
+				{
+					"id": 1,
+					"prefix": {
+						"lang_tag": "pioneer_input",
+						"text": "Input"
+					},
+					"dataType": "string",
+					"name": "Source",
+					"comparisson": "=",
+					
+					
+					"allowedValueList": [
+						{
+							"BluRay": "BD",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_bd",
+								"text": "Whenever the _DEVICE_NAME_'s input is BluRay"
+							}
+						},
+						{
+							"DVD": "DVD",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_dvd",
+								"text": "Whenever the _DEVICE_NAME_'s input is DVD"
+							}
+						},
+						
+						{
+							"SAT/CBL": "SAT/CBL",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_satcbl",
+								"text": "Whenever the _DEVICE_NAME_'s input is SAT/CBL"
+							}
+						},
+						
+						{
+							"DVR/BDR": "DVR/BDR",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_dvr",
+								"text": "Whenever the _DEVICE_NAME_'s input is DVR/BDR"
+							}
+						},
+						{
+							"VIDEO 1(VIDEO)": "VIDEO 1(VIDEO)",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_video1",
+								"text": "Whenever the _DEVICE_NAME_'s input is VIDEO 1(VIDEO)"
+							}
+						},
+						{
+							"HDMI 1": "HDMI 1",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_hdmi1",
+								"text": "Whenever the _DEVICE_NAME_'s input is hdmi1"
+							}
+						},
+						{
+							"HDMI 2": "HDMI 2",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_hdmi2",
+								"text": "Whenever the _DEVICE_NAME_'s input is hdmi2"
+							}
+						},
+						{
+							"HDMI 3": "HDMI 3",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_hdmi3",
+								"text": "Whenever the _DEVICE_NAME_'s input is hdmi3"
+							}
+						},
+						{
+							"HDMI 4": "HDMI 4",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_hdmi4",
+								"text": "Whenever the _DEVICE_NAME_'s input is hdmi4"
+							}
+						},
+						{
+							"HDMI 5": "HDMI 5",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_hdmi5",
+								"text": "Whenever the _DEVICE_NAME_'s input is hdmi5"
+							}
+						},
+						{
+							"HDMI 6": "HDMI 6",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_hdmi6",
+								"text": "Whenever the _DEVICE_NAME_'s input is hdmi6"
+							}
+						},
+						{
+							"HDMI 7": "HDMI 7",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_hdmi1",
+								"text": "Whenever the _DEVICE_NAME_'s input is hdmi1"
+							}
+						},
+						{
+							"NETWORK (cyclic)": "NETWORK (cyclic)",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_networkcyclic",
+								"text": "Whenever the _DEVICE_NAME_'s input is NETWORK (cyclic)"
+							}
+						},
+						{
+							"INTERNET RADIO": "INTERNET RADIO",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_internetradio",
+								"text": "Whenever the _DEVICE_NAME_'s input is Internet Radio"
+							}
+						},
+						{
+							"SiriusXM": "SiriusXM",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_siriusxm",
+								"text": "Whenever the _DEVICE_NAME_'s input is SiriusXM"
+							}
+						},
+						{
+							"PANDORA": "PANDORA",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_pandoa",
+								"text": "Whenever the _DEVICE_NAME_'s input is Pandora"
+							}
+						},
+						{
+							"Media Server": "MEDIA SERVER",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_mediaserver",
+								"text": "Whenever the _DEVICE_NAME_'s input is Media Server"
+							}
+						},
+						{
+							"Favorites": "FAVORITES",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_favorites",
+								"text": "Whenever the _DEVICE_NAME_'s input is Favorites"
+							}
+						},
+						{
+							"iPod/USB": "iPod/USB",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_podusb",
+								"text": "Whenever the _DEVICE_NAME_'s input is iPod/USB"
+							}
+						},
+						{
+							"USB-DAC": "USB-DAC",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_usbdac",
+								"text": "Whenever the _DEVICE_NAME_'s input is USB-DAC"
+							}
+						},
+						{
+							"TV": "TV",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_tv",
+								"text": "Whenever the _DEVICE_NAME_'s input is TV"
+							}
+						},
+						{
+							"CD": "CD",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_cd",
+								"text": "Whenever the _DEVICE_NAME_'s input is CD"
+							}
+						},
+						{
+							"Tuner": "TUNER",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_tuner",
+								"text": "Whenever the _DEVICE_NAME_'s input is TUNER"
+							}
+						},
+						{
+							"Phono": "PHONO",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_phono",
+								"text": "Whenever the _DEVICE_NAME_'s input is PHONO"
+							}
+						},
+						{
+							"Multi Ch In": "MULTI CH IN",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_multiin",
+								"text": "Whenever the _DEVICE_NAME_'s input is MULTI CH IN"
+							}
+						},
+						{
+							"Adapter Port": "ADAPTER PORT",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_adapterport",
+								"text": "Whenever the _DEVICE_NAME_'s input is Adapter Port"
+							}
+						},
+						{
+							"Mobile High-Definition Link": "MHL",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_mhl",
+								"text": "Whenever the _DEVICE_NAME_'s input is MHL"
+							}
+						},
+						{
+							"HDMI (cyclic)": "HDMI (cyclic)",
+							"HumanFriendlyText": {
+								"lang_tag": "pioneer_input_hdmicyclic",
+								"text": "Whenever the _DEVICE_NAME_'s input is HDMI (cyclic)"
+							}
+						}
+						
+					]
+
+				}
+			]
+		}		
+	],
+	 "device_type": "urn:micasaverde-com:serviceId:PioneerReceiver1"
+}
