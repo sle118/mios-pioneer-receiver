@@ -179,7 +179,7 @@ function _fmt.get_value(val,prefix)
   return string.sub(val,prefix:len()+1,val:len())
 end
 function _fmt.volume(val,lul_device)
-  local volval = tonumber(val)*0.5-80.5
+  local volval = math.ceil(tonumber(val)*0.5-80.5)
   --return  string.format('%ldB',(volval or 0)*0.5-80.5) or '?'
   return  tonumber(val) == 0 and '--dB(MIN)' or ( string.format('%s%idB',(volval>0 and '+' or (volval==0 and '±' or '')),volval) or '?')
 end
