@@ -307,49 +307,6 @@
 					}
 				}
 			]
-		},
-		{
-			"Label": {
-				"lang_tag": "pioneer_receiver_pos1",
-				"text": "Pos1"
-			},
-			"Position": 1,
-			"top_navigation_tab": 1,
-			"TabType": "javascript",
-			"ScriptName": "J_RulesEngine1.js",
-			"Function": "RulesEngine.showRules"
-		},
-		{
-			"Label": {
-				"lang_tag": "pioneer_receiver_pos2",
-				"text": "Pos2"
-			},
-			"Position": 2,
-			"top_navigation_tab": 1,
-			"TabType": "javascript",
-			"ScriptName": "J_RulesEngine1.js",
-			"Function": "RulesEngine.showErrors"
-		},
-		{
-			"Label": {
-				"lang_tag": "donate",
-				"text": "Donate"
-			},
-			"Position": 3,
-			"top_navigation_tab": 1,
-			"TabType": "javascript",
-			"ScriptName": "J_RulesEngine1.js",
-			"Function": "RulesEngine.showDonate"
-		},
-		{
-			"Label": {
-				"lang_tag": "advanced",
-				"text": "Advanced"
-			},
-			"Position": 4,
-			"TabType": "javascript",
-			"ScriptName": "shared.js",
-			"Function": "advanced_device"
 		}
 	],
 	
