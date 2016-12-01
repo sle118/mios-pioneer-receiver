@@ -1,9 +1,11 @@
-# mios-pioneer-receiver
+# mios-pioneer-receiver - vera fixes branch
 Pioneer receiver plugin with status and events
 
 I'd like to acknowledge the work originally done by @Richard Wifall, which got me kick started on creating an enchanted p enhanced version of it.
 
 The plugin is bidirectional, allowing scenes and triggers to be executed when actions are performed on the receiver. For example, I have my home theater lights turn on whenever the amp is muted and off on mute off.
+
+
 
 Some features
 * DOES NOT WORK ON VERA - Needs to run on openLuup for now until this gets sorted out
