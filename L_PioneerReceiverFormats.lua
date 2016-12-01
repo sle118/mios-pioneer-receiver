@@ -1,18 +1,15 @@
 module("L_PioneerReceiverFormats", package.seeall)
-
 function resolve_bitstring(bitstring,map)
   local output = ''
   if(map == nil or bitstring == nil ) then return '?'end
   for i = 1, #bitstring do
     local char = bitstring:sub(i,i)
     if(map[i]~=nil) then
-		-- TODO: must find a better codepage match for this
       output=output..(char=='1' and output:len()>0 and '.' or '')..(char=='1' and map[i] or '')
     end
   end
   return output
 end
-
 function bits(hex,n)
   local nmap = {['0']='0000',['1']='0001',['2']='0010',['3']='0011',['4']='0100',['5']='0101',['6']='0110',['7']='0111',['8']='1000',['9']='1001',['A']='1010',['B']='1011',['C']='1100',['D']='1101',['E']='1110',['F']='1111'}
   local pos = 2-math.ceil(n/4)+1 -- bits 1-8 are in char 1 and 9-16 in char 2
@@ -22,19 +19,27 @@ function bits(hex,n)
   return string.sub(nmap[string.sub(hex,pos,pos)],index,index)
 
 end
-
 function hextochar(hex)
   local output = ''
+  -- ensure that we are getting a series of 
+  -- 2 digits hex numbers
   local _,ret = math.modf(hex:len()/2)
   if(hex == nil or (ret~=0)) then return '?'end
+  -- decode each number into a char 
   local i=1
   while i<hex:len() do
     local curhex = hex:sub(i,i+1)
-    local n = tonumber(curhex,16)+string.byte(' ')
+    local n = tonumber(curhex,16)
+  if(n>0) then
+    --n=n+string.byte(' ')
     output = output..string.char(n)
-    i=i+2
   end
-  return output
+  i=i+2
+  end
+  if(output and output:len() >0) then
+    output = output:gsub("^%s*(.-)%s*$", "%1")
+  end
+  return output or ''
 end
 function convert_fl(val,lul_device)
   local values = {['1']='Light', ['0']='Off'}
@@ -476,7 +481,6 @@ variables_map =  {
   }
 }
 
-
 function test()
 
   luup.log(string.format('PioneerReceiverFormats Tuner preset A01,G09,I11   : %s,%s,%s',tunerpreset('A01'),tunerpreset('G09'),tunerpreset('I11')))
@@ -501,6 +505,4 @@ function test()
   luup.log(string.format('PioneerReceiverFormats Tone Bypass,On,Tone Test   : %s,%s,%s',tone('0'),tone('1'),tone('9')))
 end
 --test()
-
-
 
