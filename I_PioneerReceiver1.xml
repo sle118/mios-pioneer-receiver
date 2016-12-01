@@ -5,6 +5,13 @@
     </settings>
 
     <functions>
+function try(f, catch_f)
+  local status, exception = pcall(f)
+  if not status then
+    catch_f(exception)
+  end
+end
+	
     local p
 	local serviceName = 'urn:micasaverde-com:serviceId:PioneerReceiver1'
 	local job_WaitingToStart = 0 -- =job_WaitingToStart: In vera's UI a job in this state is 
@@ -21,7 +28,43 @@
     function parameter_changed(lul_DeviceNum,lul_Service,lul_Variable,lul_OldValue,lul_NewValue)
         p.parameter_changed(lul_DeviceNum,lul_Service,lul_Variable,lul_OldValue,lul_NewValue)
 	end	
-
+		local function tdebug(t)
+			luup.log('PioneerReceiver loading '..t)
+		end
+		function ttdebug( t,prefix)
+		  prefix = prefix or '.'
+		  local output_string = desc or ''
+		  local print_r_cache={}
+		  local function sub_print_r(t,indent,prefix)
+			if (print_r_cache[tostring(t)]) then
+			  tdebug(indent.."*"..tostring(t))
+			else
+			  print_r_cache[tostring(t)]=true
+			  if (type(t)=="table") then
+				for pos,val in pairs(t) do
+				  if (type(val)=="table") then
+					tdebug(prefix .. indent.."["..pos.."] => "..tostring(t).." {")
+					sub_print_r(val,indent..string.rep(" ",string.len(pos)+8),prefix)
+					tdebug(prefix .. indent..string.rep(" ",string.len(pos)+6).."}")
+				  elseif (type(val)=="string") then
+					tdebug(prefix .. indent.."["..pos..'] => "'..val..'"')
+				  else
+					tdebug(prefix .. indent.."["..pos.."] => "..tostring(val))
+				  end
+				end
+			  else
+				tdebug(prefix .. indent..tostring(t))
+			  end
+			end
+		  end
+		  if (type(t)=="table") then
+			tdebug(prefix..tostring(t).." {")
+			sub_print_r(t,"  ",prefix)
+			tdebug(prefix.."}")
+		  else
+			sub_print_r(t,"  ",prefix)
+		  end
+		end
 	function startup(lul_device)
 		luup.log("Pioneer plugin: loading library L_Pioneer1 ...")
 		if (package.path:find ("/etc/cmh-ludl/?.lua;/etc/cmh-lu/?.lua", 1, true) == nil) then
@@ -29,10 +72,15 @@
 		end
 
 		package.loaded.L_PioneerReceiver1 = nil
-		p = require("L_PioneerReceiver1")
 		package.loaded.L_PioneerReceiverFormats = nil
 		
-		if (package.loaded.L_PioneerReceiver1 == nil)
+		luup.log("PioneerReceiver : paths are set, about to require L_Pioneer1 --update...")
+		p = require("L_PioneerReceiver1")
+		luup.log('PioneerReceiver loading : end load')
+		
+		
+		
+		if (package.loaded.L_PioneerReceiver1 == nil or package.loaded.L_PioneerReceiverFormats == nil)
 		then
 			luup.log("PioneerReceiver plugin: plugin is not installed correctly. Library L_PioneerReceiver1 cannot be loaded.", 1)
 			luup.task("Plugin not correctly installed", 2, "PioneerReceiver plugin", -1)
@@ -81,16 +129,6 @@
 		<action>
             <serviceId>urn:micasaverde-com:serviceId:PioneerReceiver1</serviceId>
             <name>processQueue</name>
-            <run>
-				-- ***** doc 
-				-- wrapper is 
-				-- function run(lul_device, lul_settings)
-			    -- 		luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue))
-				-- 		return false -- function failed
-				-- end
-				-- ***** end doc 
-				-- luup.log('PioneerReceiver processQueue run')
-            </run>
 			<job>
 				-- ***** doc 
 				-- wrapper is 
@@ -101,41 +139,10 @@
 				-- 		return 5, 10
 				-- end
 				-- ***** end doc
-				if(p) then  return p.process_queue(lul_device,lul_settings,lul_job) else return job_WaitingToStart,1 end
+				if(p) then  return _G.process_queue(lul_device,lul_settings,lul_job) else return job_WaitingToStart,1 end
 								
 			</job>
-			<timeout>
-				-- OpenLuup does not support this
-				-- ***** doc 
-				-- wrapper is 
-				-- function timeout(lul_device, lul_settings, lul_job) 
-				-- 		luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue) .. ' job ID#: ' .. lul_job)
-				-- 		5 = job_WaitingForCallback
-				-- 		and we'll wait 10 seconds for incoming data
-				-- 		return 5, 10
-				-- end
-				-- ***** end doc 
-				-- ["command"]="?P"    ,["var"]="power"
-				-- or ["Down"] = "VD"
-				--p.log('Timeout reached',p.tracelevel.DEBUG)
-				--luup.log('PioneerReceiver processQueue Timeout reached')
-				--return job_WaitingToStart,.1,true
-			</timeout>
-			<incoming>
-				-- OpenLuup does not support this
-				-- ***** doc 
-				-- ***** end doc 
-				-- ***** doc 
-				-- Wrapper : function incoming(lul_device, lul_settings, lul_job, lul_data)
-				--	  luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue) .. ' job ID#: ' .. lul_job .. " received data: " .. lul_data)
-				--	  -- 4 = jobDone
-				--	  -- nil = n/a on the timeout since the job is done
-				--	  -- true = the incoming data was for us
-				--	  return 4, nil, true
-				--  end			
-				-- ***** end doc 	
 
-			</incoming>
 			</action>
           	<action>
 			<serviceId>urn:micasaverde-com:serviceId:PioneerReceiver1</serviceId>
