@@ -1,41 +1,20 @@
 module("L_PioneerReceiver1", package.seeall)
 -- some code loosely adapted from http://code.mios.com/trac/mios_squeezebox/browser
-
---luup.log('PioneerReceiver loading ')
-local function tdebug(t)
-	luup.log('PioneerReceiver loading '..t)
-end
-tdebug(10)
-
 fmt = require("L_PioneerReceiverFormats")
-ttdebug(fmt,"Content of 'fmt' - ")
 if(package.loaded.L_PioneerReceiverFormats == nil ) then
 	luup.log('PioneerReceiver plugin failed loading, formats package failed')
 	return nil
 end
-if(fmt == nil ) then
-	tdebug('formats are not loaded')
-end
-if(fmt.variables_map == nil ) then
-	tdebug('formats are not loaded - missing map')
-end
-
-tdebug(11)
-
-tdebug(11)
 local socket = require("socket")
-tdebug(12)
 local get_current_ms = function () return socket.gettime()*1000 end
 tracelevel = {}
 local is_debug = true
-tdebug(13)
 serviceName = 'urn:micasaverde-com:serviceId:PioneerReceiver1'
 altuiservice="urn:upnp-org:serviceId:altui1"
 local pendingResponse = {}
 ipAddress = ""
 parms = {}
 parms.LogLevel = 0
-ResponseTimeout = 1
 parms.RefreshRate = 1200 -- since the plugin maintains a connection to the amplifier, there really is no need to query more often
 parms.Status = 0
 parms.QueueDelay_ms = 300 -- according to docs, 100 ms is the min interval, but polling at that rate would flood the amplifier
@@ -44,7 +23,7 @@ parms.DisplayLine2Format = "Mute: %Mute%"
 List = {}
 commandQueue = {}
 CurrentRequest = {}
-tdebug(14)
+
 jobReturnCodes_WaitingToStart = 0 -- =job_WaitingToStart: In vera's UI a job in this state is
 -- displayed as a gray icon. It means it's waiting to start.
 -- If you return this value your 'job' code will be run again
@@ -136,14 +115,12 @@ errors_map = {
 }
 responseMap = {}
 
-
 -- -------------------------------------------------------------------------
 -- This is a global wrapper around the module's process queue
 --
 local function process_queue(lul_device,lul_settings,lul_job)
   process_queue(lul_device,lul_settings,lul_job)
 end
-tdebug(16)
 -- -------------------------------------------------------------------------
 -- This function will queue commands to retrieve all known status of the amp
 --
@@ -177,7 +154,7 @@ function _G.query_status(lul_device)
   delay_query_status(lul_device)
 
 end
-tdebug(17)
+
 -- -------------------------------------------------------------------------
 -- This function attemps to retrieve a device variable and sets it to a
 -- default it's not found
@@ -516,7 +493,7 @@ function _G.handle_ipaddress_change(lul_device)
     luup.set_failure(true)
   end
 end
-tdebug(18)
+
 -- -------------------------------------------------------------------------
 -- Perform the startup for the receiver (checks settings, checks connection,
 -- etc.
@@ -587,7 +564,6 @@ function try_connect(lul_device, disconnect)
   end
 
   if( disconnect == true) then
-  -- d'oh!   this is not implemented in openluup??
   -- TODO:  implement!
   -- luup.io.close()
   end
@@ -657,17 +633,6 @@ function queueAction(lul_device, priority,  lul_settings)
 
     end
   end
-
-
-
-  --        if( code ~= "") then
-  --        )
-  --      else
-  --        local resultString = try_get_var (lul_settings.serviceId or '?', varname, lul_device, nil)
-  --        resultCode=false
-  --        resultString = string.format('Unsupported action type %s name %s with parameter %s ',action_type_prefix or '?',action_name or '', value or '')
-  --      end
-
   -- return format should be  ok, response, error_msg
   return resultCode,jobReturnCodes_Done,string.format(resultCode and 'action call success %s' or 'action call error %s',resultString or '')
 end
@@ -869,18 +834,10 @@ end
 function is_action_value_valid(subservice,command)
   return subservice ~= nil and command ~= nil and service_map[subservice] ~= nil and service_map[subservice][command] ~= nil
 end
-tdebug(19)
 
-tdebug(20)
-
-
-tdebug(21)
-
-tdebug(22)
+-- build a reverse lookup index
 for key,value in pairs(fmt.variables_map) do
-	tdebug(23 .. 'key')
   if(value.prefix ~= nil) then
     responseMap[value.prefix] = value
   end
 end
-tdebug(23)

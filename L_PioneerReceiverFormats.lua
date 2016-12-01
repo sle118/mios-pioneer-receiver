@@ -1,20 +1,18 @@
 module("L_PioneerReceiverFormats", package.seeall)
-local function tdebug(t)
-	luup.log('PioneerReceiverFormats loading '..t)
-end
-tdebug(10)
+
 function resolve_bitstring(bitstring,map)
   local output = ''
   if(map == nil or bitstring == nil ) then return '?'end
   for i = 1, #bitstring do
     local char = bitstring:sub(i,i)
     if(map[i]~=nil) then
+		-- TODO: must find a better codepage match for this
       output=output..(char=='1' and output:len()>0 and '.' or '')..(char=='1' and map[i] or '')
     end
   end
   return output
 end
-tdebug(11)
+
 function bits(hex,n)
   local nmap = {['0']='0000',['1']='0001',['2']='0010',['3']='0011',['4']='0100',['5']='0101',['6']='0110',['7']='0111',['8']='1000',['9']='1001',['A']='1010',['B']='1011',['C']='1100',['D']='1101',['E']='1110',['F']='1111'}
   local pos = 2-math.ceil(n/4)+1 -- bits 1-8 are in char 1 and 9-16 in char 2
@@ -24,7 +22,7 @@ function bits(hex,n)
   return string.sub(nmap[string.sub(hex,pos,pos)],index,index)
 
 end
-tdebug(12)
+
 function hextochar(hex)
   local output = ''
   local _,ret = math.modf(hex:len()/2)
@@ -477,7 +475,6 @@ variables_map =  {
     }
   }
 }
-tdebug(13)
 
 
 function test()
@@ -504,41 +501,6 @@ function test()
   luup.log(string.format('PioneerReceiverFormats Tone Bypass,On,Tone Test   : %s,%s,%s',tone('0'),tone('1'),tone('9')))
 end
 --test()
-tdebug(14)
-function print_r( t,prefix)
-  prefix = prefix or '.'
-  local output_string = desc or ''
-  local print_r_cache={}
-  local function sub_print_r(t,indent,prefix)
-    if (print_r_cache[tostring(t)]) then
-      tdebug(indent.."*"..tostring(t))
-    else
-      print_r_cache[tostring(t)]=true
-      if (type(t)=="table") then
-        for pos,val in pairs(t) do
-          if (type(val)=="table") then
-            tdebug(prefix .. indent.."["..pos.."] => "..tostring(t).." {")
-            sub_print_r(val,indent..string.rep(" ",string.len(pos)+8),prefix)
-            tdebug(prefix .. indent..string.rep(" ",string.len(pos)+6).."}")
-          elseif (type(val)=="string") then
-            tdebug(prefix .. indent.."["..pos..'] => "'..val..'"')
-          else
-            tdebug(prefix .. indent.."["..pos.."] => "..tostring(val))
-          end
-        end
-      else
-        tdebug(prefix .. indent..tostring(t))
-      end
-    end
-  end
-  if (type(t)=="table") then
-    tdebug(prefix..tostring(t).." {")
-    sub_print_r(t,"  ",prefix)
-    tdebug(prefix.."}")
-  else
-    sub_print_r(t,"  ",prefix)
-  end
-end
-print_r(variables_map,'Variables map ')
-tdebug('Returning from successful module load')
+
+
 
