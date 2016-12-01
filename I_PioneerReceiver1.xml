@@ -5,13 +5,7 @@
     </settings>
 
     <functions>
-function try(f, catch_f)
-  local status, exception = pcall(f)
-  if not status then
-    catch_f(exception)
-  end
-end
-	
+
     local p
 	local serviceName = 'urn:micasaverde-com:serviceId:PioneerReceiver1'
 	local job_WaitingToStart = 0 -- =job_WaitingToStart: In vera's UI a job in this state is 
@@ -73,29 +67,15 @@ end
 
 		package.loaded.L_PioneerReceiver1 = nil
 		package.loaded.L_PioneerReceiverFormats = nil
-		
-		luup.log("PioneerReceiver : paths are set, about to require L_Pioneer1 --update...")
 		p = require("L_PioneerReceiver1")
-		luup.log('PioneerReceiver loading : end load')
-		
-		
-		
 		if (package.loaded.L_PioneerReceiver1 == nil or package.loaded.L_PioneerReceiverFormats == nil)
 		then
-			luup.log("PioneerReceiver plugin: plugin is not installed correctly. Library L_PioneerReceiver1 cannot be loaded.", 1)
+			luup.log("PioneerReceiver plugin: plugin is not installed correctly. Library L_PioneerReceiver1 or L_PioneerReceiverFormats cannot be loaded.", 1)
 			luup.task("Plugin not correctly installed", 2, "PioneerReceiver plugin", -1)
 			return false
 		end
 		return p.startup(lul_device, serviceName)
 	end
-        local function rewrite_action(lul_device,lul_settings,action_name)
-        		local new_settings = lul_settings
-        		new_settings.value = lul_settings.action
-        		-- now overwrite action!
-            	new_settings.action = action_name
-            	
-                return p.queueAction(lul_device,true,new_settings)
-        end
     </functions>
 
     -- -------------------------------------------------------------------------
@@ -117,9 +97,7 @@ end
 			-- ["command"]="?P"    ,["var"]="power"
 			-- or ["Down"] = "VD"				
 			return p.process_response(lul_device, lul_settings, lul_job, lul_data)
-				
-            --p.process_response(tostring(lul_data),lul_device)
-            --luup.log("Pioneer : Response:" .. response)	
+			
         </lua>
     </incoming>
 
