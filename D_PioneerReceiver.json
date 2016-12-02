@@ -1,7 +1,22 @@
 {
 	"default_icon": "http://i.imgur.com/yfGnAQa.png",
 	"state_icons": [
+	
 		{
+		
+			"img": "http://i.imgur.com/6JKHPYP.png",
+			"conditions": [
+				{
+			     "service":"urn:micasaverde-com:serviceId:HaDevice1",
+			      "variable":"CommFailure",
+					"operator": "==",
+					"value": "1",
+					"subcategory_num": 0
+				}
+			]
+		},
+			{
+		
 			"img": "http://i.imgur.com/AGM0jaf.png",
 			"conditions": [
 				{
@@ -16,6 +31,13 @@
 					"variable": "Mute",
 					"operator": "==",
 					"value": "Off",
+					"subcategory_num": 0
+				},
+				{
+			     "service":"urn:micasaverde-com:serviceId:HaDevice1",
+			      "variable":"CommFailure",
+					"operator": "==",
+					"value": "0",
 					"subcategory_num": 0
 				}
 			]
@@ -36,6 +58,13 @@
 					"operator": "==",
 					"value": "On",
 					"subcategory_num": 0
+				},
+				{
+			     "service":"urn:micasaverde-com:serviceId:HaDevice1",
+			      "variable":"CommFailure",
+					"operator": "==",
+					"value": "0",
+					"subcategory_num": 0
 				}
 			]
 		},
@@ -47,6 +76,13 @@
 					"variable": "Status",
 					"operator": "==",
 					"value": 0,
+					"subcategory_num": 0
+				},
+				{
+			     "service":"urn:micasaverde-com:serviceId:HaDevice1",
+			      "variable":"CommFailure",
+					"operator": "==",
+					"value": "0",
 					"subcategory_num": 0
 				}
 			]
@@ -77,39 +113,33 @@
 				}
 			],
 			"Control": [
-			{
-					"ControlGroup":"1",
-					"ControlType": "variable",
-					"top": "0",
-					"left": "0",
-					"Display": {
-						"Service": "urn:upnp-org:serviceId:altui1",
-						"Variable": "DisplayLine1",
-						"Top": 85,
-						"Left": 10,
-						"Width": 75,
-						"Height": 20
-					}
-				},
-				{
-					"ControlGroup":"1",
-					"ControlType": "variable",
-					"top": "1",
-					"left": "0",
-					"Display": {
-						"Service": "urn:upnp-org:serviceId:altui1",
-						"Variable": "DisplayLine2",
-						"Top": 95,
-						"Left": 10,
-						"Width": 75,
-						"Height": 20
-					}
-				},
+			
 			{
 					"ControlGroup": 1,
 					"ControlType": "multi_state_button",
 					"states": [
-						
+					{
+							"ControlCode": "pioneer2_off",
+							"Label": {
+								"lang_tag": "ui7_off",
+								"text": "OFF"
+							},
+							"Display": {
+								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+								"Variable": "Status",
+								"Value": 0
+							},
+							"Command": {
+								"Service": "urn:upnp-org:serviceId:SwitchPower1",
+								"Action": "SetTarget",
+								"Parameters": [
+									{
+										"Name": "newTargetValue",
+										"Value": 0
+									}
+								]
+							}
+						},						
 						{
 							"ControlCode": "pioneer2_on",
 							"Label": {
@@ -131,29 +161,8 @@
 									}
 								]
 							}
-						},
-						{
-							"ControlCode": "pioneer2_off",
-							"Label": {
-								"lang_tag": "ui7_off",
-								"text": "OFF"
-							},
-							"Display": {
-								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
-								"Variable": "Status",
-								"Value": 0
-							},
-							"Command": {
-								"Service": "urn:upnp-org:serviceId:SwitchPower1",
-								"Action": "SetTarget",
-								"Parameters": [
-									{
-										"Name": "newTargetValue",
-										"Value": 0
-									}
-								]
-							}
 						}
+						
 					],
 					"Display": {
 						"Top": 0,
@@ -164,24 +173,6 @@
 				"ControlGroup": 1,
 					"ControlType": "multi_state_button",
 					"states": [
-						
-						{
-							"ControlCode": "pioneer2_muteon",
-							"Label": {
-								"lang_tag": "pioneer2_muteon",
-								"text": "MUTE ON"
-							},
-							"Display": {
-								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
-								"Variable": "Mute",
-								"Value": "On"
-							},
-							"Command": {
-								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
-								"Action": "MuteOn",
-								"Parameters": ""
-								}
-						},
 						{
 							"ControlCode": "pioneer2_muteoff",
 							"Label": {
@@ -198,7 +189,25 @@
 								"Action": "MuteOff",
 								"Parameters": ""
 								}
+						},
+						{
+							"ControlCode": "pioneer2_muteon",
+							"Label": {
+								"lang_tag": "pioneer2_muteon",
+								"text": "MUTE ON"
+							},
+							"Display": {
+								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+								"Variable": "Mute",
+								"Value": "On"
+							},
+							"Command": {
+								"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
+								"Action": "MuteOn",
+								"Parameters": ""
+								}
 						}
+						
 					],
 					"Display": {
 						"Top": 0,
@@ -304,6 +313,31 @@
 						"Variable": "Mute",
 						"Top": 75,
 						"Left": 250
+					}
+				},
+				{
+					"ControlGroup":"1",
+					"ControlType": "variable",
+					"top": "0",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:altui1",
+						"Variable": "DisplayLine1",
+						"Top": 85,
+						"Left": 10
+	
+					}
+				},
+				{
+					"ControlGroup":"1",
+					"ControlType": "variable",
+					"top": "1",
+					"left": "0",
+					"Display": {
+						"Service": "urn:upnp-org:serviceId:altui1",
+						"Variable": "DisplayLine2",
+						"Top": 95,
+						"Left": 10
 					}
 				}
 			]

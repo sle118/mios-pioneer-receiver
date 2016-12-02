@@ -481,6 +481,83 @@ variables_map =  {
   }
 }
 
+-- -------------------------------------------------------------------------
+-- Mappings definition
+-- additional documentation can be found here
+-- https://www.pioneerelectronics.ca/StaticFiles/Custom%20Install/RS-232%20Codes/Av%20Receivers/Elite%20&%20Pioneer%20FY13AVR%20IP%20&%20RS-232%205-8-12.xls
+--
+service_map = {
+  ["urn:micasaverde-com:serviceId:InputSelection1"] = {
+    ["DiscreteinputCable"] = {command="05FN"},    -- TV/SAT
+    ["DiscreteinputCD1"] = {command="01FN"},      -- CD
+    ["DiscreteinputCD2"] = {command="01FN"},      -- CD
+    ["DiscreteinputCDR"] = {command="03FN"},      -- CD-R/TAPE
+    ["DiscreteinputDAT"] = {command="03FN"},      -- CD-R/TAPE
+    ["DiscreteinputDVD"] = {command="04FN"},      -- DVD
+    ["DiscreteinputDVI"] = {command="19FN"},      -- HDMI1
+    ["DiscreteinputHDTV"] = {command="05FN"},     -- TV/SAT
+    ["DiscreteinputLD"] = {command="00FN"},       -- PHONO
+    ["DiscreteinputMD"] = {command="03FN"},       -- CD-R/TAPE
+    ["DiscreteinputPC"] = {command="26FN"},       -- HOME MEDIA GALLERY(Internet Radio)
+    ["DiscreteinputPVR"] = {command="15FN"},      -- DVR/BDR
+    ["DiscreteinputTV"] = {command="05FN"},       -- TV/SAT
+    ["DiscreteinputVCR"] = {command="10FN"},      -- VIDEO 1(VIDEO)
+    ["Input1"] = {command="10FN"},                -- VIDEO 1(VIDEO)
+    ["Input2"] = {command="14FN"},                -- VIDEO 2
+    ["Input3"] = {command="19FN"},                -- HDMI1
+    ["Input4"] = {command="20FN"},                -- HDMI2
+    ["Input5"] = {command="21FN"},                -- HDMI3
+    ["Input6"] = {command="22FN"},                -- HDMI4
+    ["Input7"] = {command="23FN"},                -- HDMI5
+    ["Input8"] = {command="24FN"},                -- HDMI6
+    ["Input9"] = {command="25FN"},                -- BD
+    ["Input10"] = {command="17FN"},               -- iPod/USB
+    ["Source"] = {command="FU"},                  -- INPUT CHANGE (cyclic)
+    ["ToggleInput"] = {command="FU"}             -- INPUT CHANGE (cyclic)
+  },
+  ["urn:upnp-org:serviceId:SwitchPower1"] = {
+    ["Off"] =     {command="PF"},                     -- POWER OFF
+    ["On"] =      {command="PO\rPO"},                      -- POWER ON
+    ["Toggle"] =  {command="PZ"},                     -- POWER TOGGLE
+    SetTarget = {
+      parm = 'newTargetValue',
+      ["0"] =       {command="PF"},                     -- POWER OFF
+      ["1"] =       {command="PO\rPO"}
+    }
+  },
+  ["urn:micasaverde-com:serviceId:MenuNavigation1"] = {
+    ["Back"] = {command="CRT"},                   -- AMP RETURN
+    ["Down"] = {command="CDN"},                   -- AMP CURSOR DOWN
+    ["Exit"] = {command="CRT"},                   -- AMP RETURN
+    ["Left"] = {command="CLE"},                   -- AMP CURSOR LEFT
+    ["Menu"] = {command="HM"},                    -- HOME MENU
+    ["Right"] = {command="CRI"},                  -- AMP CURSOR RIGHT
+    ["Select"] = {command="CEN"},                 -- AMP CURSOR ENTER
+    ["Up"] = {command="CUP"}                     -- AMP CURSOR UP
+  },
+  ["urn:micasaverde-com:serviceId:Volume1"] = {
+    ["Down"] = {command="VD"},                    -- VOLUME DOWN
+    ["Mute"] = {command="MZ"},                    -- MUTE ON/OFF
+    ["Up"] = {command="VU"},                      -- VOLUME UP
+    ["MuteToggle"] = {command="MZ"}
+  },
+  ["urn:micasaverde-com:serviceId:PioneerReceiver1"] = {
+    SetVolumePct = {
+      parm = 'NewVolumeTargetPct',
+      command="%03.0fVL"
+    },
+    MuteOn =  {command="MO"},                     -- MuteOn
+    MuteOff =  {command="MF"}                     -- Mute Off
+
+  }
+}
+errors_map = {
+  ["E02"] = { description="NOT AVAILABLE NOW", requeue=false, disable=false, save_message=true },
+  ["E03"] = {description="INVALID COMMAND", requeue=false, disable=true, save_message=true },
+  ["E04"] = {description="COMMAND ERROR", requeue=false, disable=true, save_message=true },
+  ["E06"] = {description="PARAMETER ERROR", requeue=false, disable=true, save_message=true },
+  ["B00"] = {description="BUSY", requeue=true, save_message=false }
+}
 function test()
 
   luup.log(string.format('PioneerReceiverFormats Tuner preset A01,G09,I11   : %s,%s,%s',tunerpreset('A01'),tunerpreset('G09'),tunerpreset('I11')))

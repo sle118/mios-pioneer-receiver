@@ -22,43 +22,7 @@
     function parameter_changed(lul_DeviceNum,lul_Service,lul_Variable,lul_OldValue,lul_NewValue)
         p.parameter_changed(lul_DeviceNum,lul_Service,lul_Variable,lul_OldValue,lul_NewValue)
 	end	
-		local function tdebug(t)
-			luup.log('PioneerReceiver loading '..t)
-		end
-		function ttdebug( t,prefix)
-		  prefix = prefix or '.'
-		  local output_string = desc or ''
-		  local print_r_cache={}
-		  local function sub_print_r(t,indent,prefix)
-			if (print_r_cache[tostring(t)]) then
-			  tdebug(indent.."*"..tostring(t))
-			else
-			  print_r_cache[tostring(t)]=true
-			  if (type(t)=="table") then
-				for pos,val in pairs(t) do
-				  if (type(val)=="table") then
-					tdebug(prefix .. indent.."["..pos.."] => "..tostring(t).." {")
-					sub_print_r(val,indent..string.rep(" ",string.len(pos)+8),prefix)
-					tdebug(prefix .. indent..string.rep(" ",string.len(pos)+6).."}")
-				  elseif (type(val)=="string") then
-					tdebug(prefix .. indent.."["..pos..'] => "'..val..'"')
-				  else
-					tdebug(prefix .. indent.."["..pos.."] => "..tostring(val))
-				  end
-				end
-			  else
-				tdebug(prefix .. indent..tostring(t))
-			  end
-			end
-		  end
-		  if (type(t)=="table") then
-			tdebug(prefix..tostring(t).." {")
-			sub_print_r(t,"  ",prefix)
-			tdebug(prefix.."}")
-		  else
-			sub_print_r(t,"  ",prefix)
-		  end
-		end
+		
 	function startup(lul_device)
 		luup.log("Pioneer plugin: loading library L_Pioneer1 ...")
 		if (package.path:find ("/etc/cmh-ludl/?.lua;/etc/cmh-lu/?.lua", 1, true) == nil) then
@@ -72,7 +36,7 @@
 		then
 			luup.log("PioneerReceiver plugin: plugin is not installed correctly. Library L_PioneerReceiver1 or L_PioneerReceiverFormats cannot be loaded.", 1)
 			luup.task("Plugin not correctly installed", 2, "PioneerReceiver plugin", -1)
-			return false
+			return false,'Error','L_PioneerReceiver1'
 		end
 		return p.startup(lul_device, serviceName)
 	end
@@ -81,23 +45,12 @@
     -- -------------------------------------------------------------------------
     <incoming>
         <lua>
-			-- ***** doc 
-			-- ***** end doc 
-			-- ***** doc 
-			-- Wrapper : function incoming(lul_device, lul_settings, lul_job, lul_data)
-			--	  luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue) .. ' job ID#: ' .. lul_job .. " received data: " .. lul_data)
-			--	  -- 4 = jobDone
-			--	  -- nil = n/a on the timeout since the job is done
-			--	  -- true = the incoming data was for us
-			--	  return 4, nil, true
-			--  end			
-			-- ***** end doc 	
-			
-			-- lul_settings is an object like below 
-			-- ["command"]="?P"    ,["var"]="power"
-			-- or ["Down"] = "VD"				
+			--[[ 
+				This is the main incoming routine, which will handle all messages
+				centrally. The plugin doesn't use implementations of "timeouts", etc
+				and manages its own internal queue
+			 ]]--			
 			return p.process_response(lul_device, lul_settings, lul_job, lul_data)
-			
         </lua>
     </incoming>
 
@@ -108,17 +61,11 @@
             <serviceId>urn:micasaverde-com:serviceId:PioneerReceiver1</serviceId>
             <name>processQueue</name>
 			<job>
-				-- ***** doc 
-				-- wrapper is 
-				-- function job(lul_device, lul_settings, lul_job) 
-				-- 		luup.log('device: ' .. tostring(lul_device) .. ' value: ' .. tostring(lul_settings.newTargetValue) .. ' job ID#: ' .. lul_job)
-				-- 		-- 5 = job_WaitingForCallback
-				-- 		-- and we'll wait 10 seconds for incoming data
-				-- 		return 5, 10
-				-- end
-				-- ***** end doc
-				if(p) then  return _G.process_queue(lul_device,lul_settings,lul_job) else return job_WaitingToStart,1 end
-								
+			--[[ 
+				This service is called whenever there are messages in the queue
+				which are waiting to be processed.
+			]]--
+				if(p) then  return p.process_queue(lul_device,lul_settings,lul_job) else return job_WaitingToStart,1 end
 			</job>
 
 			</action>
