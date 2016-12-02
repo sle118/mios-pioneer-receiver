@@ -234,7 +234,7 @@
 					"text_align": "left",
 					"Display": {
 						"Service": "urn:micasaverde-com:serviceId:PioneerReceiver1",
-						"Variable": "LastUnknownMessage",
+						"Variable": "last_unknown_message",
                         "Top": 45,
                         "Left": 250
 					}

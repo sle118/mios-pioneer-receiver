@@ -23,7 +23,6 @@ globals = {
 parms = {
   LogLevel = 0,
   RefreshRate = 1200, -- since the plugin maintains a connection to the amplifier, there really is no need to query more often
-  Status = 0,
   QueueDelay_ms = 300, -- according to docs, 100 ms is the min interval, but polling at that rate would flood the amplifier
   DisplayLine1Format = "Source: %Source%",
   DisplayLine2Format = "Mute: %Mute%",
@@ -77,7 +76,7 @@ function _G.query_status(lul_device)
         for key,curElement in pairs(fmt.variables_map) do
           if(curElement["enabled"] ) then
             curElement['key'] = key
-            List.pushright(commandQueue,curElement)
+            List.pushleft(commandQueue,curElement)
           end
         end
       else
@@ -204,7 +203,7 @@ function sendCommand(command, lul_device, lul_settings, lul_job)
   if( command ~= nil and command.command ~= nil) then
     log(string.format("sending command %s ",command.command or '?'), tracelevel.DEBUG)
     -- -- Send the code to the receiver
-    if(try_connect(lul_device, false)) then
+    if(try_connect(lul_device)) then
 
       if( false == luup.io.write(command.command)) then
         log("failure when sending command : " .. command.command, tracelevel.ERROR)
@@ -259,7 +258,7 @@ function map_response(lul_data,lul_device)
         local val =fmt.get_value(lul_data,map.prefix) or lul_data
         for skey,service in pairs(map.services or {}) do
           converted = service.convert and service.convert(val,lul_device) or val
-          log(string.format('Value for variable %s : %s => %s',service.var or '?', val,converted or '?'), tracelevel.DEBUG)
+          log(string.format('Value for variable %s : %s => %s',service.var or '?', val,tostring(converted) or '?'), tracelevel.DEBUG)
           if(service.var ) then
             --log(string.format('Value %s = %s ',map.var, converted or '?'), tracelevel.DEBUG)
             setIfChanged(skey, service.var, converted, lul_device)
@@ -308,7 +307,7 @@ function handle_error(lul_data,lul_device,var,key)
   if(error.requeue and CurrentRequest ~= nil  ) then
     -- if the resource was busy, resend the command in the queue
     -- so that it can be reprocessed right away
-    List.pushleft(commandQueue,CurrentRequest)
+    List.pushright(commandQueue,CurrentRequest)
   end
   if(error.save_message) then
     setIfChanged(globals.serviceName, var, error.description, lul_device)
@@ -445,7 +444,7 @@ function _G.monitor_ip_address(lul_device, startup)
     globals.ipAddress = ipAddressNew
     globals.port = portNew
     globals.ipAddressRaw = ipAddressRawNew
-    if(not try_connect(lul_device, false)) then
+    if(not try_connect(lul_device, true)) then
       result = false
     end
 
@@ -489,7 +488,6 @@ function startup(lul_device, serviceName)
   -- register a few variables which we want to monitor specifically
   parms.LogLevel =  get_typed_parameter("LogLevel",lul_device, is_debug and tracelevel.DEBUG or tracelevel.INFO)
   parms.RefreshRate =  get_typed_parameter("RefreshRate",lul_device,parms.RefreshRate)
-  parms.Status = get_typed_parameter("Status",lul_device,parms.Status)
   parms.QueueDelay_ms  =  get_typed_parameter("QueueDelay_ms",lul_device,parms.QueueDelay_ms)
   parms.DisplayLine1Format = get_typed_parameter("DisplayLine1Format",lul_device,parms.DisplayLine1Format)
   parms.DisplayLine2Format = get_typed_parameter("DisplayLine2Format",lul_device,parms.DisplayLine2Format)
@@ -511,8 +509,8 @@ end
 -- -------------------------------------------------------------------------
 -- Connects and/or checks that the connection can be established
 --
-function try_connect(lul_device, disconnect)
-  if( globals.ipAddress ~= nil) then
+function try_connect(lul_device, force)
+  if( globals.ipAddress ~= nil and (not luup.io.is_connected() or force~= nil and force) ) then
     log(string.format('Connecting to %s:%s',globals.ipAddress,globals.port),tracelevel.INFO)
     luup.io.open(lul_device, globals.ipAddress, globals.port)
   end
@@ -571,13 +569,13 @@ function queueAction(lul_device, priority,  lul_settings)
         end
         log(string.format('Queuing command %s for action %s for service %s with %s=%s',code.command or '?',lul_settings.action or '?',lul_settings.serviceId or '?',action.parm or '?', value or '?'), tracelevel.DEBUG)
         if(priority == true) then
-          List.pushleft(commandQueue,code)
-        else
           List.pushright(commandQueue,code)
+        else
+          List.pushleft(commandQueue,code)
         end
         if(commandQueue.count <= 1 ) then
           -- nothing processing currently. add a wakeup command and process queue
-          List.pushleft(commandQueue,fmt.variables_map["WAKE"])
+          List.pushright(commandQueue,fmt.variables_map["WAKE"])
           luup.call_action(globals.serviceName, "processQueue", {}, type(lul_device)=='string' and tonumber(lul_device) or lul_device)
         end
         if(action.parm) then

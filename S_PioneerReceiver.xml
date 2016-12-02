@@ -20,6 +20,13 @@
 			<shortCode>VolumePct</shortCode>
 		</stateVariable>
 		<stateVariable>
+			<name>phase_control</name>
+			<sendEventsAttribute>no</sendEventsAttribute>
+			<dataType>string</dataType>
+			<shortCode>phase_control</shortCode>
+		</stateVariable>		
+		
+		<stateVariable>
 			<name>NewVolumeTargetPct</name>
 			<sendEventsAttribute>no</sendEventsAttribute>
 			<dataType>integer</dataType>

@@ -1,4 +1,22 @@
 module("L_PioneerReceiverFormats", package.seeall)
+
+sources_desc = {    ['25']="BD",['04']="DVD",['06']="SAT/CBL",['15']="DVR/BDR",['10']="VIDEO 1(VIDEO)",['19']="HDMI 1",['20']="HDMI 2",['21']="HDMI 3",['22']="HDMI 4",['23']="HDMI 5",['24']="HDMI 6",['34']="HDMI 7",['26']="NETWORK (cyclic)",['38']="INTERNET RADIO",['40']="SiriusXM",['41']="PANDORA",['44']="MEDIA SERVER",['45']="FAVORITES",['17']="iPod/USB",['05']="TV",['01']="CD",['13']="USB-DAC",['02']="TUNER",['00']="PHONO",['12']="MULTI CH IN",['33']="ADAPTER PORT",['48']="MHL",['31']="HDMI (cyclic)"}
+function store_desc(val,lul_device)
+  local index = string.sub(val or '',1,2)
+  local newValue = string.sub(val or '',4,val:len())
+  sources_desc[index]=newValue
+  return newValue
+end
+function convert_is(val,lul_device)
+  local values = {
+    ['0']='PHASE CONTROL OFF',
+    ['1']='PHASE CONTROL ON',
+    ['2']='FULL BAND PHASE CONTROL ON',
+    ['9']='PHASE CONTROL (cyclic)'
+  }
+  return values[val] or '?'
+
+end
 function resolve_bitstring(bitstring,map)
   local output = ''
   if(map == nil or bitstring == nil ) then return '?'end
@@ -21,20 +39,20 @@ function bits(hex,n)
 end
 function hextochar(hex)
   local output = ''
-  -- ensure that we are getting a series of 
+  -- ensure that we are getting a series of
   -- 2 digits hex numbers
   local _,ret = math.modf(hex:len()/2)
   if(hex == nil or (ret~=0)) then return '?'end
-  -- decode each number into a char 
+  -- decode each number into a char
   local i=1
   while i<hex:len() do
     local curhex = hex:sub(i,i+1)
     local n = tonumber(curhex,16)
-  if(n>0) then
-    --n=n+string.byte(' ')
-    output = output..string.char(n)
-  end
-  i=i+2
+    if(n>0) then
+      --n=n+string.byte(' ')
+      output = output..string.char(n)
+    end
+    i=i+2
   end
   if(output and output:len() >0) then
     output = output:gsub("^%s*(.-)%s*$", "%1")
@@ -44,7 +62,7 @@ end
 function convert_fl(val,lul_device)
   local values = {['1']='Light', ['0']='Off'}
   local flags=string.sub(val,1,2)
-  local output = bits(flags,1)=='1' and 'VOL ' or bits(flags,0)=='1' and 'GUID ' or ''
+  local output = bits(flags,1)=='1' and '[+V+] ' or '[-V-] ' and bits(flags,0)=='1' and '[+G+] ' or '[-G-] '
   output = output..hextochar(string.sub(val,3,30))
   return output:upper()
 end
@@ -146,7 +164,7 @@ function convert_vst(val,lul_device)
   local HDMI_ZONE_Monitor_Recommend_Resolution_Information_val = HDMI_ZONE_Monitor_Recommend_Resolution_Information_code ~='0' and HDMI_ZONE_Monitor_Recommend_Resolution_Information_values[HDMI_ZONE_Monitor_Recommend_Resolution_Information_code] or '?'
   local HDMI_ZONE_Monitor_DeepColor_val = HDMI_ZONE_Monitor_DeepColor_code ~='0' and HDMI_ZONE_Monitor_DeepColor_values[HDMI_ZONE_Monitor_DeepColor_code] or '?'
   local HDMI_ZONE_Monitor_Extend_Color_Space_val = resolve_bitstring(HDMI_ZONE_Monitor_Extend_Color_Space_code,HDMI_ZONE_Monitor_Extend_Color_Space_values)
- --Input HDMI[YcbCr444,24bit (8bit*3),Standard]  16:9@1080/60p,  ,  
+  --Input HDMI[YcbCr444,24bit (8bit*3),Standard]  16:9@1080/60p,  ,
 
 
 
@@ -168,7 +186,7 @@ function convert_vst(val,lul_device)
     Output_aspect_val,
     Output_Resolution_val,
     Output_3D_format_HDMI_only_val,
-        
+
     HDMI_1_Monitor_DeepColor_val,
     HDMI_1_Monitor_Extend_Color_Space_val,
     HDMI_1_Monitor_Recommend_Resolution_Information_val,
@@ -205,12 +223,12 @@ end
 function tunerfreq(val,lul_device)
   local values = {['A']='AM', ['F']='FM'}
   local af = val:sub(1,1) or ''
-  
+
   local freq = af=='A' and string.format('%u',tonumber(val:sub(2,6))) or af=='F' and string.format('%.2f',tonumber(val:sub(2,6))/100) or ''
   local freqtxt = af=='A' and 'kHz' or af=='F' and 'MHz' or '?'
-  
+
   output = string.format('%s %s%s',values[af] or '',freq,freqtxt)
-  
+
   return output
 end
 function listeningmode(val,lul_device)
@@ -226,8 +244,7 @@ function power_raw(val,lul_device)
   return values[val] or val or '?'
 end
 function source(val,lul_device)
-  local values = {    ['25']="BD",['04']="DVD",['06']="SAT/CBL",['15']="DVR/BDR",['10']="VIDEO 1(VIDEO)",['19']="HDMI 1",['20']="HDMI 2",['21']="HDMI 3",['22']="HDMI 4",['23']="HDMI 5",['24']="HDMI 6",['34']="HDMI 7",['26']="NETWORK (cyclic)",['38']="INTERNET RADIO",['40']="SiriusXM",['41']="PANDORA",['44']="MEDIA SERVER",['45']="FAVORITES",['17']="iPod/USB",['05']="TV",['01']="CD",['13']="USB-DAC",['02']="TUNER",['00']="PHONO",['12']="MULTI CH IN",['33']="ADAPTER PORT",['48']="MHL",['31']="HDMI (cyclic)"}
-  return values[val] or val or '?'
+  return sources_desc[val] or val or '?'
 end
 function simpledb(val,lul_device)
   local value = (tonumber(val)-6)*-1
@@ -237,70 +254,97 @@ function tone(val,lul_device)
   local values={['0']='Bypass',['1']='On',['9']='Tone'}
   return values[val] or val or '?'
 end
-  
+
 
 variables_map =  {
   ["WAKE"] =    {
     ["command"]="\r"},
+  -- get input names first, as they will be used for source queries below
+  RGB25={ prefix='RGB', command='?RGB25', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB04={ prefix='RGB', command='?RGB04', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB06={ prefix='RGB', command='?RGB06', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB15={ prefix='RGB', command='?RGB15', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB10={ prefix='RGB', command='?RGB10', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB19={ prefix='RGB', command='?RGB19', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB20={ prefix='RGB', command='?RGB20', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB21={ prefix='RGB', command='?RGB21', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB22={ prefix='RGB', command='?RGB22', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB23={ prefix='RGB', command='?RGB23', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB24={ prefix='RGB', command='?RGB24', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB34={ prefix='RGB', command='?RGB34', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB38={ prefix='RGB', command='?RGB38', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB40={ prefix='RGB', command='?RGB40', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB41={ prefix='RGB', command='?RGB41', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB44={ prefix='RGB', command='?RGB44', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB45={ prefix='RGB', command='?RGB45', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB17={ prefix='RGB', command='?RGB17', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB13={ prefix='RGB', command='?RGB13', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB05={ prefix='RGB', command='?RGB05', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB01={ prefix='RGB', command='?RGB01', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB03={ prefix='RGB', command='?RGB03', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB02={ prefix='RGB', command='?RGB02', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB00={ prefix='RGB', command='?RGB00', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB12={ prefix='RGB', command='?RGB12', enabled=true, services={ loc_update={ convert=store_desc }      }   },
+  RGB33={ prefix='RGB', command='?RGB33', enabled=true, services={ loc_update={ convert=store_desc }      }   },
   ["POWER"] =   {
-    ["prefix"]="PWR",   
-    ["command"]="?P",   
+    ["prefix"]="PWR",
+    ["command"]="?P",
     ["enabled"]="true",
     ["services"] = {
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={ 
-        ["var"] ="Power", 
-        ["convert"]=power 
+      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
+        ["var"] ="Power",
+        ["convert"]=power
       },
-      ['urn:upnp-org:serviceId:SwitchPower1'] = { 
-        ["var"] ="Status", 
-        ["convert"]=power_raw 
+      ['urn:upnp-org:serviceId:SwitchPower1'] = {
+        ["var"] ="Status",
+        ["convert"]=power_raw
       }
     }
-  },  
+  },
   ["VOLUME"]= {
-    ["prefix"]="VOL",   
-    ["command"]="?V",   
-    ["enabled"]=true, 
-    ["services"] = { 
+    ["prefix"]="VOL",
+    ["command"]="?V",
+    ["enabled"]=true,
+    ["services"] = {
       ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
-        ["var"] ="Volume", 
+        ["var"] ="Volume",
         ["convert"]=volume
       },
       ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
-        ["var"] ="VolumePct", 
+        ["var"] ="VolumePct",
         ["convert"]=volume_pct
-      }      
+      }
     }
   },
   ["MUTE"]= {
-    ["prefix"]="MUT",   
-    ["command"]="?M",   
-    ["enabled"]=true, 
-    ["services"] ={ 
+    ["prefix"]="MUT",
+    ["command"]="?M",
+    ["enabled"]=true,
+    ["services"] ={
       ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
-        ["var"] ="Mute", 
+        ["var"] ="Mute",
         ["convert"]=mute
       }
     }
   },
   ["LISTENINGMODE"]= {
-    ["prefix"]="LM",    
-    ["command"]="?L",   
-    ["enabled"]=true, 
-    ["services"] ={ 
+    ["prefix"]="LM",
+    ["command"]="?L",
+    ["enabled"]=true,
+    ["services"] ={
       ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
-        ["var"] ="ListeningMode", 
+        ["var"] ="ListeningMode",
         ["convert"]=listeningmode
       }
     }
   },
   ["DISPLAYINFO"]= {
-    ["prefix"]="FL",    
-    ["command"]="?FL",  
-    ["enabled"]=true, 
-    ["services"] ={ 
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = { 
-        ["var"] ="DisplayInfo", ["convert"]=convert_fl 
+    ["prefix"]="FL",
+    ["command"]="?FL",
+    ["enabled"]=true,
+    ["services"] ={
+      ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
+        ["var"] ="DisplayInfo", ["convert"]=convert_fl
       }
     }
   },
@@ -338,27 +382,27 @@ variables_map =  {
     }
   },
   ["ZONE3VOLUME"]=  {
-      ["prefix"]="YV",
-      ["command"]="?YV",
-      ["enabled"]=true,
-      ["services"]={
-        ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-          ["var"]="zone3volume",
-          ["convert"]=zonevolume
-        }
+    ["prefix"]="YV",
+    ["command"]="?YV",
+    ["enabled"]=true,
+    ["services"]={
+      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
+        ["var"]="zone3volume",
+        ["convert"]=zonevolume
       }
-    },
+    }
+  },
   ["ZONE3INPUT"]= {
     ["prefix"]="Z3F",
     ["command"]="?ZT",
     ["enabled"]=true,
     ["services"]={
-        ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-          ["var"]="Zone3Input",
-          ["convert"]=zoneinput
-        }
+      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
+        ["var"]="Zone3Input",
+        ["convert"]=zoneinput
       }
-    },
+    }
+  },
   ["ZONE3POWER"]= {
     ["prefix"]="BPR",
     ["command"]="?BP",
@@ -416,7 +460,7 @@ variables_map =  {
   },
   ["SOURCE"]= {
     ["prefix"]="FN",
-    ["command"]="?F", ["enabled"]=true, 
+    ["command"]="?F", ["enabled"]=true,
     ["services"]={
       ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
         ["var"]="Source",
@@ -478,7 +522,20 @@ variables_map =  {
         ["convert"]=convert_vst
       }
     }
+  },
+  ["IS"]={
+    ["prefix"]="IS",
+    ["command"]="?IS",
+    ["enabled"]=true,
+    ["services"]={
+      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
+        ["var"]="phase_control",
+        ["convert"]=convert_is
+      }
+    }
   }
+
+
 }
 
 -- -------------------------------------------------------------------------
@@ -488,7 +545,7 @@ variables_map =  {
 --
 service_map = {
   ["urn:micasaverde-com:serviceId:InputSelection1"] = {
-    ["DiscreteinputCable"] = {command="05FN"},    -- TV/SAT
+    ["DiscreteinputCable"] = {command="06FN"},    -- TV/SAT
     ["DiscreteinputCD1"] = {command="01FN"},      -- CD
     ["DiscreteinputCD2"] = {command="01FN"},      -- CD
     ["DiscreteinputCDR"] = {command="03FN"},      -- CD-R/TAPE
@@ -573,7 +630,7 @@ function test()
   luup.log(string.format('PioneerReceiverFormats Zone Volume test 0,-80,min : %s,%s,%s',zonevolume('81'),zonevolume('01'),zonevolume('00')))
   luup.log(string.format('PioneerReceiverFormats Audio Format Test          : %s',convert_ast('0502111110001000000000000111111011000000000')))
   luup.log(string.format('PioneerReceiverFormats Audio Format Test          : %s',convert_vst('10123221122210310100009110000050606100100')))
-  luup.log()             
+  luup.log()
   luup.log(string.format('PioneerReceiverFormats PLIIx listening mode Test  : %s',listeningmode('0103')))
   luup.log(string.format('PioneerReceiverFormats Mute On,Off Test           : %s,%s',mute('0'),mute('1')))
   luup.log(string.format('PioneerReceiverFormats Power On,Off Test          : %s,%s',power('0'),power('1')))
