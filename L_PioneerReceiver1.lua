@@ -1,12 +1,7 @@
 module("L_PioneerReceiver1", package.seeall)
 -- some code loosely adapted from http://code.mios.com/trac/mios_squeezebox/browser
 
-fmt = require("L_PioneerReceiverFormats")
 
-if(package.loaded.L_PioneerReceiverFormats == nil ) then
-  luup.log('PioneerReceiver plugin failed loading, formats package failed')
-  return nil
-end
 
 local socket = require("socket")
 local get_current_ms = function () return socket.gettime()*1000 end
@@ -20,13 +15,23 @@ globals = {
   altuiservice="urn:upnp-org:serviceId:altui1",
   ipAddressRaw = ""
 }
+
+fmt = require("L_PioneerReceiverFormats")
+if(package.loaded.L_PioneerReceiverFormats == nil ) then
+  luup.log('PioneerReceiver plugin failed loading, formats package failed')
+  return nil
+end
+fmt.default_service = globals.serviceName
+
 parms = {
   LogLevel = 0,
   RefreshRate = 1200, -- since the plugin maintains a connection to the amplifier, there really is no need to query more often
-  QueueDelay_ms = 300, -- according to docs, 100 ms is the min interval, but polling at that rate would flood the amplifier
+  QueueDelay_ms = 100, -- according to docs, 100 ms is the min interval
+  command_timeout_ms = 400,
   DisplayLine1Format = "Source: %Source%",
   DisplayLine2Format = "Mute: %Mute%",
   default_port = "23",
+  max_timeout_count = 3, -- max timeout for individual parameters.  assuming that more timeouts means unsupported
   ip_monitor_delay = 5 -- the ip address of the device is monitored every x (seconds) for changes
 }
 
@@ -47,13 +52,6 @@ jobReturnCodes = {
 
 
 -- -------------------------------------------------------------------------
--- This is a global wrapper around the module's process queue
---
-local function process_queue(lul_device,lul_settings,lul_job)
-  process_queue(lul_device,lul_settings,lul_job)
-end
-
--- -------------------------------------------------------------------------
 -- This function parses/validates an ip address format and returns it
 -- with a split port number.  If no port number is specified, a default
 -- port is returned instead.
@@ -67,15 +65,15 @@ end
 -- This function will queue commands to retrieve all known status of the amp
 --
 function _G.query_status(lul_device)
-  log("Called to queue query status. ", tracelevel.DEBUG)
+  log("Called to initiate status refresh from device. ", tracelevel.INFO)
 
   if(globals.ipAddress ~= nil) then
     if commandQueue.count == 0 then
       log('Preparing items to query...',tracelevel.DEBUG)
       if(fmt.variables_map ~= nil) then
         for key,curElement in pairs(fmt.variables_map) do
-          if(curElement["enabled"] ) then
-            curElement['key'] = key
+          if(curElement.enabled and curElement.command ) then
+            curElement.key = key
             List.pushleft(commandQueue,curElement)
           end
         end
@@ -170,8 +168,8 @@ end
 -- Return true if changed or false if no change
 --
 function setIfChanged(serviceId, name, value, deviceId)
-  if name == nil then
-    log('variable name was nil',tracelevel.ERROR)
+  if(serviceId == nil or name == nil or deviceId == nil or deviceId == 0 ) then
+    log(string.format('Missing parameter : serviceId=%s, variable=%s, value=%s, device=%s',serviceId or 'MISSING',name or 'MISSING',value or '',tostring(deviceID or '')), tracelevel.ERROR )
     return false
   end
   local curValue = luup.variable_get(serviceId, name, deviceId)
@@ -201,7 +199,7 @@ end
 --
 function sendCommand(command, lul_device, lul_settings, lul_job)
   if( command ~= nil and command.command ~= nil) then
-    log(string.format("sending command %s ",command.command or '?'), tracelevel.DEBUG)
+    log(string.format("%s, sending  %s ",command.key or '?', command.command or '?'), tracelevel.INFO)
     -- -- Send the code to the receiver
     if(try_connect(lul_device)) then
 
@@ -227,7 +225,6 @@ function process_response(lul_device, lul_settings, lul_job, lul_data)
   local newVal = lul_data or 'N/A'
 
   log(string.format('PioneerReceiver incoming data : %s ', lul_data or ''),tracelevel.TRACE)
-
   if(lul_data ~= nil) then
     if(lul_data == 'R') then
       log('Received ACK', tracelevel.DEBUG)
@@ -258,15 +255,17 @@ function map_response(lul_data,lul_device)
         local val =fmt.get_value(lul_data,map.prefix) or lul_data
         for skey,service in pairs(map.services or {}) do
           converted = service.convert and service.convert(val,lul_device) or val
-          log(string.format('Value for variable %s : %s => %s',service.var or '?', val,tostring(converted) or '?'), tracelevel.DEBUG)
+          log(string.format('%s, receiving var: %s, value:  %s',key or '?',service.var or '?', tostring(converted) or '?'), tracelevel.INFO)
           if(service.var ) then
             --log(string.format('Value %s = %s ',map.var, converted or '?'), tracelevel.DEBUG)
             setIfChanged(skey, service.var, converted, lul_device)
-            if(key and CurrentRequest and CurrentRequest.key and key == CurrentRequest.key) then
-              -- unmark current request as is now processed
-              CurrentRequest = nil
-            end
           end
+        end
+        if(CurrentRequest.key and key == CurrentRequest.key) then
+          -- unmark current request as is now processed
+          CurrentRequest = {}
+        elseif ( map.prefix and CurrentRequest.c_pfix and map.prefix == CurrentRequest.c_pfix) then
+          CurrentRequest = {}
         end
         break
       end
@@ -276,6 +275,10 @@ function map_response(lul_data,lul_device)
       setIfChanged(globals.serviceName, 'last_unknown_message', lul_data, lul_device)
     end
   end
+  if(CurrentRequest.key == nil) then
+    process_queue(lul_device,lul_settings,0)
+  end
+
   return converted, map
 end
 -- -------------------------------------------------------------------------
@@ -299,26 +302,28 @@ function handle_error(lul_data,lul_device,var,key)
   lul_device = lul_device or '?'
   var = var or '?'
   key = key or '?'
-
+  local map = key~=nil and fmt.variables_map[key] or {}
   local error = fmt.errors_map[lul_data]
   if(error == nil) then return nil end
 
-  log(string.format('%s when processing command %s',error.description,key or '?' ),tracelevel.ERROR)
+  log(string.format('%s,          code %s, error : %s',key or '?' ,map.command or '?',error.description),tracelevel.ERROR)
   if(error.requeue and CurrentRequest ~= nil  ) then
     -- if the resource was busy, resend the command in the queue
     -- so that it can be reprocessed right away
     List.pushright(commandQueue,CurrentRequest)
   end
-  if(error.save_message) then
-    setIfChanged(globals.serviceName, var, error.description, lul_device)
+  if(error.save_message and map ~=nil) then
+    for skey,service in pairs(map.services or {}) do
+      if(service.var ) then setIfChanged(skey, service.var, string.format('%s=>%s',map.command or '?', error.description or '?'), lul_device)        end
+    end
   end
-  if( error.disable and key ~= nil and var ~= nil ) then
+  if( error.disable and map ~= nil and var ~= nil ) then
     -- We need to disable querying this variable since there was a fatal error
     set_query_enable(key,false)
-    setIfChanged(globals.serviceName, var, error.description, lul_device)
+    --setIfChanged(globals.serviceName, var, error.description, lul_device)
   end
   -- unmark current request so it doesn't time out.
-  CurrentRequest = nil
+  CurrentRequest = {}
   return error
 end
 
@@ -339,36 +344,51 @@ function _G.process_queue(lul_device,lul_settings,lul_job)
   log('processQueue processing',tracelevel.DEBUG)
   local returnCode = jobReturnCodes.Done
   local submitDelay = nil
-  
-  if(CurrentRequest ~= nil and CurrentRequest.key ~= nil) then
-    log(string.format('last command %s for variable %s did not receive response',CurrentRequest.command or '?', CurrentRequest.var or '?'),tracelevel.WARNING)
-    -- turn off that option to avoid flooding the device with unsupported queries
-    set_query_enable(CurrentRequest.key,false)
-    -- reset current request
-    CurrentRequest = nil
+
+  if(CurrentRequest.key ~= nil ) then
+    if(is_expired(CurrentRequest)) then
+      local timeout_count = fmt.variables_map[CurrentRequest.key].timeout_count or 0
+      timeout_count = timeout_count + 1
+      fmt.variables_map[CurrentRequest.key].timeout_count = timeout_count
+      log(string.format('%s, timeout count is %i',CurrentRequest.key or '?',timeout_count),tracelevel.WARNING)
+      -- re-queue the request
+
+      if(fmt.variables_map[CurrentRequest.key].timeout_count <= parms.max_timeout_count ) then
+        List.pushright(commandQueue,CurrentRequest)
+      end
+      -- reset current request
+      CurrentRequest = {}
+      submitDelay = parms.QueueDelay_ms / 1000
+    end
   end
-  if commandQueue.count > 0 then
-    local command = List.popleft(commandQueue)
-    print_r(command,string.format('Queue has %u elements to process. Current command : ',commandQueue.count) ,tracelevel.TRACE)
-    if(sendCommand(command, lul_device, command, lul_job)) then
-      -- the response should come really quick
-      log('run queue job success',tracelevel.TRACE)
-      CurrentRequest = command
-      submitDelay = parms.QueueDelay_ms / 1000
-      luup.set_failure(0)
+  if (  CurrentRequest.key==nil ) then
+    if(commandQueue.count > 0 ) then
+      local command = List.popleft(commandQueue)
+      print_r(command,string.format('Queue has %u elements to process. Current command : ',commandQueue.count) ,tracelevel.TRACE)
+      if(sendCommand(command, lul_device, command, lul_job)) then
+        CurrentRequest = copy_obj(command)
+        set_expiry_ms(CurrentRequest, (CurrentRequest.prefix ~=nil or CurrentRequest.c_pfix ~=nil) and parms.command_timeout_ms or .01)
+        submitDelay = parms.QueueDelay_ms / 1000
+        luup.set_failure(0)
+      else
+        log('run queue job did not succeed',tracelevel.ERROR)
+        submitDelay = parms.QueueDelay_ms / 1000
+        returnCode= jobReturnCodes.Error
+        luup.set_failure(1)
+      end
     else
-      log('run queue job did not succeed',tracelevel.ERROR)
-      submitDelay = parms.QueueDelay_ms / 1000
-      returnCode= jobReturnCodes.Error
-      luup.set_failure(1)
+      log('Queue processing Done',tracelevel.INFO)
+      submitDelay=0
     end
   else
-    log('Nothing in the queue',tracelevel.DEBUG)
-    submitDelay=0
+    log('Current command not complete',tracelevel.DEBUG)
   end
-  if(submitDelay ~= nil and submitDelay>0 ) then
+
+  if(submitDelay ~= nil and submitDelay>0 and lul_job ~= 0) then
     delay_process_queue(lul_device,submitDelay)
   end
+
+
   -- we are resubmitting the queue processing job ourselves, so we're going to set the timeout to 0 so vera doesn't call back
   return returnCode,0
 end
@@ -432,7 +452,7 @@ function _G.monitor_ip_address(lul_device, startup)
     if(startup ~= true) then
       -- need to reset the process queue and re-scan the device
       log(string.format('Ip address was changed from %s to %s. Restarting plugin',globals.ipAddressRaw or '?', ipAddressRawNew),tracelevel.INFO)
-      CurrentRequest = nil
+      CurrentRequest = {}
       if(commandQueue ~= nil and commandQueue.count ~= 0 ) then
         commandQueue = ListNew()
       end
@@ -444,15 +464,16 @@ function _G.monitor_ip_address(lul_device, startup)
     globals.ipAddress = ipAddressNew
     globals.port = portNew
     globals.ipAddressRaw = ipAddressRawNew
-    if(not try_connect(lul_device, true)) then
-      result = false
-    end
-
     -- schedule a status query
     if(delay_query_status(lul_device,1) ~= true) then
       luup.set_failure(1)
       result = false
     end
+
+    if(not try_connect(lul_device, true)) then
+      result = false
+    end
+
   end
 
   -- reschedule  address change monitoring
@@ -491,6 +512,7 @@ function startup(lul_device, serviceName)
   parms.QueueDelay_ms  =  get_typed_parameter("QueueDelay_ms",lul_device,parms.QueueDelay_ms)
   parms.DisplayLine1Format = get_typed_parameter("DisplayLine1Format",lul_device,parms.DisplayLine1Format)
   parms.DisplayLine2Format = get_typed_parameter("DisplayLine2Format",lul_device,parms.DisplayLine2Format)
+  parms.command_timeout_ms = get_typed_parameter("command_timeout_ms",lul_device,parms.command_timeout_ms)
 
   -- register for all variable changes
   luup.variable_watch("parameter_changed",globals.serviceName, nil,lul_device)
@@ -703,11 +725,11 @@ tracelevel.TRACE = 2
 tracelevel.ERROR = -1
 tracelevel.WARNING = -2
 local levelText = {}
-levelText[tracelevel.ERROR] = "ERROR"
+levelText[tracelevel.ERROR] =   "ERROR  "
 levelText[tracelevel.WARNING] = "WARNING"
-levelText[tracelevel.INFO] = "INFO"
-levelText[tracelevel.DEBUG] = "DEBUG"
-levelText[tracelevel.TRACE] = "TRACE"
+levelText[tracelevel.INFO] =    "INFO   "
+levelText[tracelevel.DEBUG] =   "DEBUG  "
+levelText[tracelevel.TRACE] =   "TRACE  "
 parms.LogLevel = tracelevel.INFO
 
 function log(text, level)
@@ -748,7 +770,7 @@ function set_query_all(enable_flag)
 end
 
 function set_query_enable(key,enable_flag)
-  if(key ~= nil and enable_flag ~= nil and fmt.variables_map[key]) then
+  if(key ~= nil and fmt.variables_map[key]) then
     log(string.format('Changing query enable flag for %s to %s', key or '?',tostring(enable_flag)),tracelevel.TRACE)
     fmt.variables_map[key].enabled = enable_flag
   else
@@ -767,7 +789,7 @@ end
 
 function is_expired(object)
   local current_ms = get_current_ms()
-  local command_expiry = object["expiry"]
+  local command_expiry = object.expiry
   if( command_expiry ~= nil and current_ms > command_expiry ) then
     return true
   else
@@ -781,7 +803,7 @@ end
 function set_expiry_ms(object, delay_ms)
   local current_ms = get_current_ms()
   local expTime = socket.gettime() + delay_ms
-  object["expiry"]=expTime
+  object.expiry=expTime
 end
 
 function push_expiry_ms(object,delay_ms)

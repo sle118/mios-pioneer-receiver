@@ -1,5 +1,6 @@
 module("L_PioneerReceiverFormats", package.seeall)
 
+default_service = 'urn:micasaverde-com:serviceId:PioneerReceiver1'
 sources_desc = {    ['25']="BD",['04']="DVD",['06']="SAT/CBL",['15']="DVR/BDR",['10']="VIDEO 1(VIDEO)",['19']="HDMI 1",['20']="HDMI 2",['21']="HDMI 3",['22']="HDMI 4",['23']="HDMI 5",['24']="HDMI 6",['34']="HDMI 7",['26']="NETWORK (cyclic)",['38']="INTERNET RADIO",['40']="SiriusXM",['41']="PANDORA",['44']="MEDIA SERVER",['45']="FAVORITES",['17']="iPod/USB",['05']="TV",['01']="CD",['13']="USB-DAC",['02']="TUNER",['00']="PHONO",['12']="MULTI CH IN",['33']="ADAPTER PORT",['48']="MHL",['31']="HDMI (cyclic)"}
 function store_desc(val,lul_device)
   local index = string.sub(val or '',1,2)
@@ -7,15 +8,171 @@ function store_desc(val,lul_device)
   sources_desc[index]=newValue
   return newValue
 end
-function convert_is(val,lul_device)
+
+function conv_mcacc_memory(val,lul_device)
+  local values = { ['0']='MCACC MEMORY (cyclic)', ['1']='MEMORY 1', ['2']='MEMORY 2', ['3']='MEMORY 3', ['4']='MEMORY 4', ['5']='MEMORY 5', ['6']='MEMORY 6', ['9']='MCACC MEMORY (cyclic reverse)'  }
+  return values[val] or '?'
+end
+function convert_on_off_cycl(val,lul_device)
   local values = {
-    ['0']='PHASE CONTROL OFF',
-    ['1']='PHASE CONTROL ON',
-    ['2']='FULL BAND PHASE CONTROL ON',
-    ['9']='PHASE CONTROL (cyclic)'
+    ['0']='Off',
+    ['1']='On',
+    ['8']='(cyclic reverse)',
+    ['9']='(cyclic)'
   }
   return values[val] or '?'
+end
 
+function conv_signal_select(val,lul_device)
+  local values = {['0']='Auto',['1']='Analog',['2']='Digital',['3']='HDMI',['9']='Signal Select (cyclic)'}
+  return values[val] or '?'
+end
+
+function conv_phase_control_plus(val,lul_device)
+  --[[
+    00 to 16 by ASCII code. (1step=1ms)
+     00:0ms
+     01:1ms
+    ...:...
+     15:15ms
+     16:16ms
+     97:AUTO
+     98:DOWN
+     99:UP
+ ]]--
+  local values = { ['97'] = 'Auto', ['98']='Down', ['99']='Up'  }
+  return values[val] or val
+end
+function conv_sound_delay(val,lul_device)
+  --[[
+000 to 100 by ASCII code.(1step=0.1frame)
+ 000:0.0frame
+ 001:0.1ftame
+ ...:...
+ 099:9.9frame
+ 100:10.0frame
+ 998:DOWN
+ 999:UP
+
+]]--
+  local values = {['998']='Down', ['999']='Up'  }
+  return values[val] or string.format('%.2f',tonumber(val)/10) or '?'..val..'?'
+end
+function conv_dialog_enhacement(val,lul_device)
+  local values = {['0']='Off',['1']='Flat',['2']='Up1',['3']='Up2',['4']='Up3',['5']='Up4',['8']='Down (cyclic)',['9']='Up (cyclic)' }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_dual_mono(val,lul_device)
+  local values = {['0']='CH1&CH2',['1']='CH1',['2']='CH2',['8']='DOWN (cyclic)',['9']='UP (cyclic)'    }
+  return values[val] or '?'..val or '?'..'?'
+end
+
+function conv_drc(val,lul_device)
+  local values = { ['0']='Off',['1']='Auto',['2']='Mid',['3']='Max',['8']='DOWN (cyclic)',['9']='UP (cyclic)'}
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_lfe_att(val,lul_device)
+  local values = {['0']='0dB',['1']='-5dB',['2']='-10dB',['3']='-15dB',['4']='-20dB',['5']='OFF',['8']='DOWN',['9']='UP'}
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_sacd_gain(val,lul_device)
+  local values = { ['0']='0dB',['1']='+6dB',['9']='SACD GAIN (cyclic)'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_formatnum_3digits(val,lul_device)
+  return string.format('%3f',tonumber(val or '0'))
+end
+function conv_number_base50(val,lul_device)
+  local dim = tonumber(val)-50
+  return  string.format('%2.0f',dim or 0)
+end
+function conv_dimension(val,lul_device)
+  return  conv_number_base50(val,lul_device)
+end
+function conv_center_image_neo_option(val,lul_device)
+  local values = {['98']='Down', ['99']='Up'  }
+  return values[val] or string.format('%.1f',tonumber(val)/10) or '?'..val..'?'
+end
+function conv_low_mid_high(val,lul_device)
+  local values = { ['0']='Low',['1']='Mid',['2']='High',['8']='DOWN (cyclic)',['9']='UP (cyclic)'  }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_min_mid_max(val,lul_device)
+  local values = { ['0']='Min',['1']='Mid',['2']='Max',['8']='DOWN (cyclic)',['9']='UP (cyclic)'  }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_slow_sharp_short(val,lul_device)
+  local values = { 'Slow','Sharp','Short',['8']='DOWN (cyclic)',['9']='UP (cyclic)'  }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_amp_speakers(val,lul_device)
+  local values = { ['0']='Off',['1']='A On',['2']='B On',['3']='A+B On'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_amp_hdmi_output(val,lul_device)
+  local values = { ['0']='HDMI OUT ALL',['1']='HDMI OUT 1',['2']='HDMI OUT 2',['9']='HDMI OUT (cyclic)'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_amp_hdmi_audio(val,lul_device)
+  local values = { ['0']='Amp',['1']='Through',['9']='HDMI AUDIO (cyclic)'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_amp_pqls_setting(val,lul_device)
+  local values = { ['0']='Off',['1']='Auto',['9']='PQLS (cyclic)'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_amp_sleep_remain_time(val,lul_device)
+  return string.format('%3f',tonumber(val or '0'))
+end
+function conv_amp(val,lul_device)
+  local values = { ['0']='AMP On',['1']='AMP Front Off',['2']='AMP Front & Center Off',['3']='AMP Off',['98']='DOWN (cyclic)',['99']='UP (cyclic)'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_panel_key_lock(val,lul_device)
+  local values = { ['0']='Off',['1']='KEY LOCK On',['2']='KEY & VOLUME LOCK On'  }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_remote_lock_(val,lul_device)
+  local values = { ['0']='Off',['1']='On'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_video_converter(val,lul_device)
+  local values = { ['0']='Off',['1']='On',['9']='VIDEO CONVERTER (cyclic)'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_video_resolution(val,lul_device)
+  local values = { ['0']='Auto',['1']='PURE',['2']='Reserved ',['3']='480/576p',['4']='720p',['5']='1080i',['6']='1080p',['7']='1080/24p',['98']='RESOLUTION DOWN (cyclic)',['99']='RESOLUTION UP (cyclic)',   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_video_pure_cinema(val,lul_device)
+  local values = { ['0']='Auto',['1']='On',['2']='Off',['8']='PURE CINEMA DOWN (cyclic)',['9']='PURE CINEMA UP (cyclic)',   }
+  return values[val] or '?'..val or '?'..'?'
+end
+
+function conv_video_prog_motion(val,lul_device)
+  return  conv_number_base50(val,lul_device)
+end
+function conv_video_stream_smoother(val,lul_device)
+  local values = { ['0']='Off',['1']='On',['2']='Auto',['8']='STREAM SMOOTHER DOWN',['9']='STREAM SMOOTHER UP '   }
+  return values[val] or '?'..val or '?'..'?'
+end
+
+function conv_video_advanced_video_adjust(val,lul_device)
+  local values = { ['0']='PDP',['1']='LCD',['2']='FPJ',['3']='Professional',['4']='Memory',['8']='VIDEO PRESET DOWN (cyclic)',['9']='VIDEO PRESET UP (cyclic)'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_video_black_setup(val,lul_device)
+  local values = { ['12']='0',['1']='7.5',['9']='BLACK SETUP (cyclic)'  }
+  return values[val] or '?'..val or '?'..'?'
+end
+function conv_video_aspect(val,lul_device)
+  local values = { ['0']='Through',['1']='Normal',['9']='ASPECT (cyclic)'   }
+  return values[val] or '?'..val or '?'..'?'
+end
+
+function convert_is(val,lul_device)
+  local values = {    ['0']='Off',    ['1']='On',    ['2']='Full Band',    ['9']='(cyclic)'  }
+  return values[val] or '?'
 end
 function resolve_bitstring(bitstring,map)
   local output = ''
@@ -73,8 +230,9 @@ function tunerpreset(val,lul_device)
   return bank..val:sub(2,3)
 end
 function zoneinput(val,lul_device)
-  local values = {['04']='DVD',['06']='SAT/CBL',['15']='DVR/BDR',['10']='VIDEO 1(VIDEO)',['26']='NETWORK (cyclic)',['38']='INTERNET RADIO',['40']='SiriusXM',['41']='PANDORA',['44']='MEDIA SERVER',['45']='FAVORITES',['17']='iPod/USB',['13']='USB-DAC',['05']='TV',['01']='CD',['02']='TUNER',['33']='ADAPTER PORT'}
-  return values[val] or '?'
+  --local values = {['04']='DVD',['06']='SAT/CBL',['15']='DVR/BDR',['10']='VIDEO 1(VIDEO)',['26']='NETWORK (cyclic)',['38']='INTERNET RADIO',['40']='SiriusXM',['41']='PANDORA',['44']='MEDIA SERVER',['45']='FAVORITES',['17']='iPod/USB',['13']='USB-DAC',['05']='TV',['01']='CD',['02']='TUNER',['33']='ADAPTER PORT'}
+  --return values[val] or '?'
+  return sources_desc[val] or '?'
 end
 function convert_ast(val,lul_device)
   local input_signal_values = {["00"]="ANALOG",["01"]="ANALOG",["02"]="ANALOG",["03"]="PCM",["04"]="PCM",["05"]="DOLBY DIGITAL",["06"]="DTS",["07"]="DTS-ES Matrix",["08"]="DTS-ES Discrete",["09"]="DTS 96/24",["10"]="DTS 96/24 ES Matrix",["11"]="DTS 96/24 ES Discrete",["12"]="MPEG-2 AAC",["13"]="WMA9 Pro",["14"]="DSD->PCM",["15"]="HDMI THROUGH",["16"]="DOLBY DIGITAL PLUS",["17"]="DOLBY TrueHD",["18"]="DTS EXPRESS",["19"]="DTS-HD Master Audio",["20"]="DTS-HD High Resolution",["21"]="DTS-HD High Resolution",["22"]="DTS-HD High Resolution",["23"]="DTS-HD High Resolution",["24"]="DTS-HD High Resolution",["25"]="DTS-HD High Resolution",["26"]="DTS-HD High Resolution",["27"]="DTS-HD Master Audio"  }
@@ -216,6 +374,13 @@ function zonevolume(val,lul_device)
   local volval = tonumber(val)-81
   return  tonumber(val) == 0 and '--dB(MIN)' or (string.format('%s%idB',(volval>0 and '+' or (volval==0 and '±' or '')),volval) or '?')
 end
+function zonelevel(val,lul_device)
+  local volval = tonumber(val)-50
+  return  tonumber(val) == 0 and '--dB(MIN)' or (string.format('%s%idB',(volval>0 and '+' or (volval==0 and '±' or '')),volval) or '?')
+end
+function zonevolume_pct(val,lul_device)
+  return  math.ceil(tonumber(val)/81*100)
+end
 function mute(val,lul_device)
   local values = {['0']='On', ['1']='Off'}
   return values[val] or '?'
@@ -256,285 +421,176 @@ function tone(val,lul_device)
 end
 
 
-variables_map =  {
-  ["WAKE"] =    {
-    ["command"]="\r"},
-  -- get input names first, as they will be used for source queries below
-  RGB25={ prefix='RGB', command='?RGB25', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB04={ prefix='RGB', command='?RGB04', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB06={ prefix='RGB', command='?RGB06', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB15={ prefix='RGB', command='?RGB15', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB10={ prefix='RGB', command='?RGB10', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB19={ prefix='RGB', command='?RGB19', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB20={ prefix='RGB', command='?RGB20', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB21={ prefix='RGB', command='?RGB21', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB22={ prefix='RGB', command='?RGB22', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB23={ prefix='RGB', command='?RGB23', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB24={ prefix='RGB', command='?RGB24', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB34={ prefix='RGB', command='?RGB34', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB38={ prefix='RGB', command='?RGB38', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB40={ prefix='RGB', command='?RGB40', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB41={ prefix='RGB', command='?RGB41', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB44={ prefix='RGB', command='?RGB44', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB45={ prefix='RGB', command='?RGB45', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB17={ prefix='RGB', command='?RGB17', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB13={ prefix='RGB', command='?RGB13', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB05={ prefix='RGB', command='?RGB05', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB01={ prefix='RGB', command='?RGB01', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB03={ prefix='RGB', command='?RGB03', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB02={ prefix='RGB', command='?RGB02', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB00={ prefix='RGB', command='?RGB00', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB12={ prefix='RGB', command='?RGB12', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  RGB33={ prefix='RGB', command='?RGB33', enabled=true, services={ loc_update={ convert=store_desc }      }   },
-  ["POWER"] =   {
-    ["prefix"]="PWR",
-    ["command"]="?P",
-    ["enabled"]="true",
-    ["services"] = {
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"] ="Power",
-        ["convert"]=power
-      },
-      ['urn:upnp-org:serviceId:SwitchPower1'] = {
-        ["var"] ="Status",
-        ["convert"]=power_raw
-      }
-    }
-  },
-  ["VOLUME"]= {
-    ["prefix"]="VOL",
-    ["command"]="?V",
-    ["enabled"]=true,
-    ["services"] = {
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
-        ["var"] ="Volume",
-        ["convert"]=volume
-      },
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
-        ["var"] ="VolumePct",
-        ["convert"]=volume_pct
-      }
-    }
-  },
-  ["MUTE"]= {
-    ["prefix"]="MUT",
-    ["command"]="?M",
-    ["enabled"]=true,
-    ["services"] ={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
-        ["var"] ="Mute",
-        ["convert"]=mute
-      }
-    }
-  },
-  ["LISTENINGMODE"]= {
-    ["prefix"]="LM",
-    ["command"]="?L",
-    ["enabled"]=true,
-    ["services"] ={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
-        ["var"] ="ListeningMode",
-        ["convert"]=listeningmode
-      }
-    }
-  },
-  ["DISPLAYINFO"]= {
-    ["prefix"]="FL",
-    ["command"]="?FL",
-    ["enabled"]=true,
-    ["services"] ={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1'] = {
-        ["var"] ="DisplayInfo", ["convert"]=convert_fl
-      }
-    }
-  },
-  ["TUNERPRESET"]=  {
-    ["prefix"]="PR",
-    ["command"]="?PR",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="TunerPreset",
-        ["convert"]=tunerpreset
-      }
-    }
-  },
-  ["TUNERFREQ"]={
-    ["prefix"]="FR",
-    ["command"]="?FR",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="TunerFreq",
-        ["convert"]=tunerfreq
-      }
-    }
-  },
-  ["ZONE3MUTE"]=    {
-    ["prefix"]="Z3MUT",
-    ["command"]="?Z3M",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Zone3Mute"
-        ,["convert"]=mute
-      }
-    }
-  },
-  ["ZONE3VOLUME"]=  {
-    ["prefix"]="YV",
-    ["command"]="?YV",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="zone3volume",
-        ["convert"]=zonevolume
-      }
-    }
-  },
-  ["ZONE3INPUT"]= {
-    ["prefix"]="Z3F",
-    ["command"]="?ZT",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Zone3Input",
-        ["convert"]=zoneinput
-      }
-    }
-  },
-  ["ZONE3POWER"]= {
-    ["prefix"]="BPR",
-    ["command"]="?BP",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Zone3Power",
-        ["convert"]=power
-      }
-    }
-  },
-  ["ZONE2MUTE"]=    {
-    ["prefix"]="Z2MUT",
-    ["command"]="?Z2M",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Zone2Mute",
-        ["convert"]=mute
-      }
-    }
-  },
-  ["ZONE2VOLUME"]=  {
-    ["prefix"]="ZV",
-    ["command"]="?ZV",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Zone2Volume",
-        ["convert"]=zonevolume
-      }
-    }
-  },
-  ["ZONE2INPUT"]= {
-    ["prefix"]="Z2F",
-    ["command"]="?ZS",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Zone2Input",
-        ["convert"]=zoneinput
-      }
-    }
-  },
-  ["ZONE2POWER"]= {
-    ["prefix"]="APR",
-    ["command"]="?AP",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Zone2Power",
-        ["convert"]=power
-      }
-    }
-  },
-  ["SOURCE"]= {
-    ["prefix"]="FN",
-    ["command"]="?F", ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Source",
-        ["convert"]=source
-      }
-    }
-  },
-  ["TREBLE"]=     {
-    ["prefix"]="TR",
-    ["command"]="?TR",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Treble",
-        ["convert"]=simpledb
-      }
-    }
-  },
-  ["BASS"]=     {
-    ["prefix"]="BA",
-    ["command"]="?BA",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Bass",
-        ["convert"]=simpledb
-      }
-    }
-  },
-  ["TONE"]=     {
-    ["prefix"]="TO",
-    ["command"]="?TO",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="Tone",
-        ["convert"]=tone
-      }
-    }
-  },
-  ["AST"]={
-    ["prefix"]="AST",
-    ["command"]="?AST",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="AudioInfo",
-        ["convert"]=convert_ast
-      }
-    }
-  },
-  ["VST"]={
-    ["prefix"]="VST",
-    ["command"]="?VST",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="VideoInfo",
-        ["convert"]=convert_vst
-      }
-    }
-  },
-  ["IS"]={
-    ["prefix"]="IS",
-    ["command"]="?IS",
-    ["enabled"]=true,
-    ["services"]={
-      ['urn:micasaverde-com:serviceId:PioneerReceiver1']={
-        ["var"]="phase_control",
-        ["convert"]=convert_is
-      }
-    }
-  }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+variables_map={
+WAKE={command="\r"},
+    --get input names first, as they will be used for source queries below
+    Get_name=                            {prefix='RGB',                       enabled=false,services={loc_update={convert=store_desc}}},
+    Get_name_bd=                         {c_pfix='RGB',command='?RGB25',      enabled=true},
+    Get_name_dvd=                        {c_pfix='RGB',command='?RGB04',      enabled=true},
+    Get_name_sat_cbl=                    {c_pfix='RGB',command='?RGB06',      enabled=true},
+    Get_name_dvr_bdr=                    {c_pfix='RGB',command='?RGB15',      enabled=true},
+    Get_name_video_1video=               {c_pfix='RGB',command='?RGB10',      enabled=true},
+    Get_name_hdmi_1=                     {c_pfix='RGB',command='?RGB19',      enabled=true},
+    Get_name_hdmi_2=                     {c_pfix='RGB',command='?RGB20',      enabled=true},
+    Get_name_hdmi_3=                     {c_pfix='RGB',command='?RGB21',      enabled=true},
+    Get_name_hdmi_4=                     {c_pfix='RGB',command='?RGB22',      enabled=true},
+    Get_name_hdmi_5=                     {c_pfix='RGB',command='?RGB23',      enabled=true},
+    Get_name_hdmi_6=                     {c_pfix='RGB',command='?RGB24',      enabled=true},
+    Get_name_hdmi_7=                     {c_pfix='RGB',command='?RGB34',      enabled=true},
+    Get_name_internet_radio=             {c_pfix='RGB',command='?RGB38',      enabled=true},
+    Get_name_siriusxm=                   {c_pfix='RGB',command='?RGB40',      enabled=true},
+    Get_name_pandora=                    {c_pfix='RGB',command='?RGB41',      enabled=true},
+    Get_name_media_server=               {c_pfix='RGB',command='?RGB44',      enabled=true},
+    Get_name_favorites=                  {c_pfix='RGB',command='?RGB45',      enabled=true},
+    Get_name_ipod_usb=                   {c_pfix='RGB',command='?RGB17',      enabled=true},
+    Get_name_usb_dac=                    {c_pfix='RGB',command='?RGB13',      enabled=true},
+    Get_name_tv=                         {c_pfix='RGB',command='?RGB05',      enabled=true},
+    Get_name_cd=                         {c_pfix='RGB',command='?RGB01',      enabled=true},
+    Get_name_cdr_tape=                   {c_pfix='RGB',command='?RGB03',      enabled=true},
+    Get_name_tuner=                      {c_pfix='RGB',command='?RGB02',      enabled=true},
+    Get_name_phono=                      {c_pfix='RGB',command='?RGB00',      enabled=true},
+    Get_name_multi_ch_in=                {c_pfix='RGB',command='?RGB12',      enabled=true},
+    Get_name_adapter_port=               {c_pfix='RGB',command='?RGB33',      enabled=true},
+    Power=                               {prefix='PWR',command="?P",          enabled=true,services={[default_service]={var="Power"                        ,convert=power},
+                                                                                                     ['urn:upnp-org:serviceId:SwitchPower1']={var="Status" ,convert=power_raw}}},
+    Volume=                              {prefix="VOL",command="?V",          enabled=true,services={[default_service]={var="Volume"                       ,convert=volume},
+                                                                                                     [default_service]={var="VolumePct"                    ,convert=volume_pct}}},
+    Mute=                                {prefix="MUT",command="?M",          enabled=true,services={[default_service]={var="Mute"                         ,convert=mute}}},
+    ListeningMode=                       {prefix="LM",command="?L",           enabled=true,services={[default_service]={var="ListeningMode"                ,convert=listeningmode}}},
+    DisplayInfo=                         {prefix="FL",command="?FL",          enabled=true,services={[default_service]={var="DisplayInfo"                  ,convert=convert_fl}}},
+    TunerPreset=                         {prefix="PR",command="?PR",          enabled=true,services={[default_service]={var="TunerPreset"                  ,convert=tunerpreset}}},
+    TunerFreq=                           {prefix="FR",command="?FR",          enabled=true,services={[default_service]={var="TunerFreq"                    ,convert=tunerfreq}}},
+    Zone2Mute=                           {prefix="Z2MUT",command="?Z2M",      enabled=true,services={[default_service]={var="Zone2Mute"                    ,convert=mute}}},
+    Zone2Volume=                         {prefix="ZV",command="?ZV",          enabled=true,services={[default_service]={var="Zone2VolumePct"               ,convert=zonevolume_pct},
+                                                                                                     [default_service]={var="Zone2Volume"                  ,convert=zonevolume}}},
+    Zone2Input=                          {prefix="Z2F",command="?ZS",         enabled=true,services={[default_service]={var="Zone2Input"                   ,convert=zoneinput}}},
+    Zone2Power=                          {prefix="APR",command="?AP",         enabled=true,services={[default_service]={var="Zone2Power"                   ,convert=power}}},
+    Zone2Tone=                           {prefix='ZGA',command='?ZGA',        enabled=true,services={[default_service]={var='Zone2Tone'                    ,convert=tone}}},
+    Zone2Bass=                           {prefix='ZGB',command='?ZGB',        enabled=true,services={[default_service]={var='Zone2Bass'                    ,convert=simpledb}}},
+    Zone2Treble=                         {prefix='ZGC',command='?ZGC',        enabled=true,services={[default_service]={var='Zone2Treble'                  ,convert=simpledb}}},
+    Zone2ChL_Level=                      {prefix='ZGEL__',command='?ZGEL__',  enabled=true,services={[default_service]={var='Zone2ChL_Level'               ,convert=zonelevel}}},
+    Zone2ChR_Level=                      {prefix='ZGER__',command='?ZGER__',  enabled=true,services={[default_service]={var='Zone2ChR_Level'               ,convert=zonelevel}}},
+                                                                                                                                                           
+    Zone3Mute=                           {prefix="Z3MUT",command="?Z3M",      enabled=true,services={[default_service]={var="Zone3Mute"                    ,convert=mute}}},
+    Zone3Volume=                         {prefix="YV",command="?YV",          enabled=true,services={[default_service]={var="Zone3VolumePct"               ,convert=zonevolume_pct},
+                                                                                                     [default_service]={var="Zone3Volume"                  ,convert=zonevolume}}},
+    Zone3Input=                          {prefix="Z3F",command="?ZT",         enabled=true,services={[default_service]={var="Zone3Input"                   ,convert=zoneinput}}},
+    Zone3Power=                          {prefix="BPR",command="?BP",         enabled=true,services={[default_service]={var="Zone3Power"                   ,convert=power}}},
+    Zone3Tone=                           {prefix='ZHA',command='?ZHA',        enabled=true,services={[default_service]={var='Zone3Tone'                    ,convert=tone}}},
+    Zone3Bass=                           {prefix='ZHB',command='?ZHB',        enabled=true,services={[default_service]={var='Zone3Bass'                    ,convert=simpledb}}},
+    Zone3Treble=                         {prefix='ZHC',command='?ZHC',        enabled=true,services={[default_service]={var='Zone3Treble'                  ,convert=simpledb}}},
+    Zone3ChL_Level=                      {prefix='ZHEL__',command='?ZHEL__',  enabled=true,services={[default_service]={var='Zone3ChL_Level'               ,convert=zonelevel}}},
+    Zone3ChR_Level=                      {prefix='ZHER__',command='?ZHER__',  enabled=true,services={[default_service]={var='Zone3ChR_Level'               ,convert=zonelevel}}},
+                                                                                                                                                           
+    Zone3Mute=                           {prefix="Z4MUT",command="?Z4M",      enabled=true,services={[default_service]={var="Zone4Mute"                    ,convert=mute}}},
+    Zone3Volume=                         {prefix="XV",command="?XV",          enabled=true,services={[default_service]={var="Zone4VolumePct"               ,convert=zonevolume_pct},
+                                                                                                     [default_service]={var="Zone4Volume"                  ,convert=zonevolume}}},
+    Zone3Input=                          {prefix="ZEA",command="?ZEA",        enabled=true,services={[default_service]={var="Zone4Input"                   ,convert=zoneinput}}},
+    Zone3Power=                          {prefix="ZEP",command="?ZEP",        enabled=true,services={[default_service]={var="Zone4Power"                   ,convert=power}}},
+    Zone3Tone=                           {prefix='ZIA',command='?ZIA',        enabled=true,services={[default_service]={var='Zone4Tone'                    ,convert=tone}}},
+    Zone3Bass=                           {prefix='ZIB',command='?ZIB',        enabled=true,services={[default_service]={var='Zone4Bass'                    ,convert=simpledb}}},
+    Zone3Treble=                         {prefix='ZIC',command='?ZIC',        enabled=true,services={[default_service]={var='Zone4Treble'                  ,convert=simpledb}}},
+    Zone3ChL_Level=                      {prefix='ZIEL__',command='?ZIEL__',  enabled=true,services={[default_service]={var='Zone4ChL_Level'               ,convert=zonelevel}}},
+    Zone3ChR_Level=                      {prefix='ZIER__',command='?ZIER__',  enabled=true,services={[default_service]={var='Zone4ChR_Level'               ,convert=zonelevel}}},
+    Source=                              {prefix="FN",command="?F",           enabled=true,services={[default_service]={var="Source"                       ,convert=source}}},
+    Treble=                              {prefix="TR",command="?TR",          enabled=true,services={[default_service]={var="Treble"                       ,convert=simpledb}}},
+    Bass=                                {prefix="BA",command="?BA",          enabled=true,services={[default_service]={var="Bass"                         ,convert=simpledb}}},
+    Tone=                                {prefix="TO",command="?TO",          enabled=true,services={[default_service]={var="Tone"                         ,convert=tone}}},
+    AudioInfo=                           {prefix="AST",command="?AST",        enabled=true,services={[default_service]={var="AudioInfo"                    ,convert=convert_ast}}},
+    VideoInfo=                           {prefix="VST",command="?VST",        enabled=true,services={[default_service]={var="VideoInfo"                    ,convert=convert_vst}}},
+    IS=                                  {prefix="IS",command="?IS",          enabled=true,services={[default_service]={var="phase_control"                ,convert=convert_is}}},
+    mcacc_memory=                        {prefix='MC',command='?MC',          enabled=true,services={[default_service]={var='mcacc_memory'                 ,convert=conv_mcacc_memory}}},
+    virtual_sb=                          {prefix='VSB',command='?VSB',        enabled=true,services={[default_service]={var='virtual_sb'                   ,convert=convert_on_off_cycl}}},
+    virtual_height=                      {prefix='VHT',command='?VHT',        enabled=true,services={[default_service]={var='virtual_height'               ,convert=convert_on_off_cycl}}},
+    sound_retriever=                     {prefix='ATA',command='?ATA',        enabled=true,services={[default_service]={var='sound_retriever'              ,convert=convert_on_off_cycl}}},
+    signal_select=                       {prefix='SDA',command='?SDA',        enabled=true,services={[default_service]={var='signal_select'                ,convert=conv_signal_select}}},
+    analog_input_att=                    {prefix='SDB',command='?SDB',        enabled=true,services={[default_service]={var='analog_input_att'             ,convert=convert_on_off_cycl}}},
+    eq=                                  {prefix='ATC',command='?ATC',        enabled=true,services={[default_service]={var='eq'                           ,convert=convert_on_off_cycl}}},
+    standing_wave=                       {prefix='ATD',command='?ATD',        enabled=true,services={[default_service]={var='standing_wave'                ,convert=convert_on_off_cycl}}},
+    phase_control_plus=                  {prefix='ATE',command='?ATE',        enabled=true,services={[default_service]={var='phase_control_plus'           ,convert=conv_phase_control_plus}}},
+    sound_delay=                         {prefix='ATF',command='?ATF',        enabled=true,services={[default_service]={var='sound_delay'                  ,convert=conv_sound_delay}}},
+    digital_noise_reduction=             {prefix='ATG',command='?ATG',        enabled=true,services={[default_service]={var='digital_noise_reduction'      ,convert=convert_on_off_cycl}}},
+    dialog_enhacement=                   {prefix='ATH',command='?ATH',        enabled=true,services={[default_service]={var='dialog_enhacement'            ,convert=conv_dialog_enhacement}}},
+    hi_bit=                              {prefix='ATI',command='?ATI',        enabled=true,services={[default_service]={var='hi_bit'                        ,convert=convert_on_off_cycl}}},
+    dual_mono=                           {prefix='ATJ',command='?ATJ',        enabled=true,services={[default_service]={var='dual_mono'                     ,convert=conv_dual_mono}}},
+    fixed_pcm=                           {prefix='ATK',command='?ATK',        enabled=true,services={[default_service]={var='fixed_pcm'                     ,convert=convert_on_off_cycl}}},
+    drc=                                 {prefix='ATL',command='?ATL',        enabled=true,services={[default_service]={var='drc'                           ,convert=conv_drc}}},
+    lfe_att=                             {prefix='ATM',command='?ATM',        enabled=true,services={[default_service]={var='lfe_att'                       ,convert=conv_lfe_att}}},
+    sacd_gain=                           {prefix='ATN',command='?ATN',        enabled=true,services={[default_service]={var='sacd_gain'                     ,convert=conv_sacd_gain}}},
+    auto_delay=                          {prefix='ATO',command='?ATO',        enabled=true,services={[default_service]={var='auto_delay'                    ,convert=convert_on_off_cycl}}},
+    center_width_pl2_music_option=       {prefix='ATP',command='?ATP',        enabled=true,services={[default_service]={var='center_width_pl2_music_option' ,convert=conv_formatnum_3digits}}},
+    panorama_pl2_music_option=           {prefix='ATQ',command='?ATQ',        enabled=true,services={[default_service]={var='panorama_pl2_music_option'     ,convert=convert_on_off_cycl}}},
+    dimension_pl2_music_option=          {prefix='ATR',command='?ATR',        enabled=true,services={[default_service]={var='dimension_pl2_music_option'    ,convert=conv_dimension}}},
+    center_image_neo_option=             {prefix='ATS',command='?ATS',        enabled=true,services={[default_service]={var='center_image_neo_option'       ,convert=conv_center_image_neo_option}}},
+    effect=                              {prefix='ATT',command='?ATT',        enabled=true,services={[default_service]={var='effect'                        ,convert=conv_formatnum_3digits}}},
+    height_gain_pl2z_height_option=      {prefix='ATU',command='?ATU',        enabled=true,services={[default_service]={var='height_gain_pl2z_height_option',convert=conv_low_mid_high}}},
+    virtual_depth=                       {prefix='VDP',command='?VDP',        enabled=true,services={[default_service]={var='virtual_depth'                 ,convert=conv_min_mid_max}}},
+    digital_filter=                      {prefix='ATV',command='?ATV',        enabled=true,services={[default_service]={var='digital_filter'                ,convert=conv_slow_sharp_short}}},
+    loudness_management=                 {prefix='ATW',command='?ATW',        enabled=true,services={[default_service]={var='loudness_management'           ,convert=convert_on_off_cycl}}},
+    virtual_wide=                        {prefix='VWD',command='?VWD',        enabled=true,services={[default_service]={var='virtual_wide'                  ,convert=convert_on_off_cycl}}},
+    ch_level_L=                          {prefix='CLVL__',command='?L__CLV',  enabled=true,services={[default_service]={var='ch_level_L'                    ,convert=conv_ch_level}}},
+    ch_level_R=                          {prefix='CLVR__',command='?R__CLV',  enabled=true,services={[default_service]={var='ch_level_R'                    ,convert=conv_ch_level}}},
+    ch_level_C=                          {prefix='CLVC__',command='?C__CLV',  enabled=true,services={[default_service]={var='ch_level_C'                    ,convert=conv_ch_level}}},
+    ch_level_SL=                         {prefix='CLVSL_',command='?SL_CLV',  enabled=true,services={[default_service]={var='ch_level_SL'                   ,convert=conv_ch_level}}},
+    ch_level_SR=                         {prefix='CLVSR_',command='?SR_CLV',  enabled=true,services={[default_service]={var='ch_level_SR'                   ,convert=conv_ch_level}}},
+    ch_level_SBL=                        {prefix='CLVSBL',command='?SBLCLV',  enabled=true,services={[default_service]={var='ch_level_SBL'                  ,convert=conv_ch_level}}},
+    ch_level_SBR=                        {prefix='CLVSBR',command='?SBRCLV',  enabled=true,services={[default_service]={var='ch_level_SBR'                  ,convert=conv_ch_level}}},
+    ch_level_SW=                         {prefix='CLVSW_',command='?SW_CLV',  enabled=true,services={[default_service]={var='ch_level_SW'                   ,convert=conv_ch_level}}},
+    ch_level_LH=                         {prefix='CLVLH_',command='?LH_CLV',  enabled=true,services={[default_service]={var='ch_level_LH'                   ,convert=conv_ch_level}}},
+    ch_level_RH=                         {prefix='CLVRH_',command='?RH_CLV',  enabled=true,services={[default_service]={var='ch_level_RH'                   ,convert=conv_ch_level}}},
+    ch_level_LW=                         {prefix='CLVLW_',command='?LW_CLV',  enabled=true,services={[default_service]={var='ch_level_LW'                   ,convert=conv_ch_level}}},
+    ch_level_RW=                         {prefix='CLVRW_',command='?RW_CLV',  enabled=true,services={[default_service]={var='ch_level_RW'                   ,convert=conv_ch_level}}},
+    amp_speakers=                        {prefix='SPK',command='?SPK',        enabled=true,services={[default_service]={var='amp_speakers'                  ,convert=conv_amp_speakers}}},
+    amp_hdmi_output=                     {prefix='HO',command='?HO',          enabled=true,services={[default_service]={var='amp_hdmi_output'               ,convert=conv_amp_hdmi_output}}},
+    amp_hdmi_audio=                      {prefix='HA',command='?HA',          enabled=true,services={[default_service]={var='amp_hdmi_audio'                ,convert=conv_amp_hdmi_audio}}},
+    amp_pqls_setting=                    {prefix='PQ',command='?PQ',          enabled=true,services={[default_service]={var='amp_pqls_setting'              ,convert=conv_amp_pqls_setting}}},
+    amp_sleep_remain_time=               {prefix='SAB',command='?SAB',        enabled=true,services={[default_service]={var='amp_sleep_remain_time'         ,convert=conv_amp_sleep_remain_time}}},
+    amp=                                 {prefix='SAC',command='?SAC',        enabled=true,services={[default_service]={var='amp'                           ,convert=conv_amp}}},
+    panel_key_lock=                      {prefix='PKL',command='?PKL',        enabled=true,services={[default_service]={var='panel_key_lock'                ,convert=conv_panel_key_lock}}},
+    remote_lock=                         {prefix='RML',command='?RML',        enabled=true,services={[default_service]={var='remote_lock'                   ,convert=conv_remote_lock}}},
+    video_converter=                     {prefix='VTB',command='?VTB',        enabled=true,services={[default_service]={var='video_converter'               ,convert=conv_video_converter}}},
+    video_resolution=                    {prefix='VTC',command='?VTC',        enabled=true,services={[default_service]={var='video_resolution'              ,convert=conv_video_resolution}}},
+    video_pure_cinema=                   {prefix='VTD',command='?VTD',        enabled=true,services={[default_service]={var='video_pure_cinema'             ,convert=conv_video_pure_cinema}}},
+    video_prog_motion=                   {prefix='VTE',command='?VTE',        enabled=true,services={[default_service]={var='video_prog_motion'             ,convert=conv_video_prog_motion}}},
+    video_stream_smoother=               {prefix='VTF',command='?VTF',        enabled=true,services={[default_service]={var='video_stream_smoother'         ,convert=conv_video_stream_smoother}}},
+    video_advanced_video_adjust=         {prefix='VTG',command='?VTG',        enabled=true,services={[default_service]={var='video_advanced_video_adjust'   ,convert=conv_video_advanced_video_adjust}}},
+    video_ynr=                           {prefix='VTH',command='?VTH',        enabled=true,services={[default_service]={var='video_ynr'                     ,convert=conv_number_base50}}},
+    video_cnr=                           {prefix='VTI',command='?VTI',        enabled=true,services={[default_service]={var='video_cnr'                     ,convert=conv_number_base50}}},
+    video_bnr=                           {prefix='VTJ',command='?VTJ',        enabled=true,services={[default_service]={var='video_bnr'                     ,convert=conv_number_base50}}},
+    video_mnr=                           {prefix='VTK',command='?VTK',        enabled=true,services={[default_service]={var='video_mnr'                     ,convert=conv_number_base50}}},
+    video_detail=                        {prefix='VTL',command='?VTL',        enabled=true,services={[default_service]={var='video_detail'                  ,convert=conv_number_base50}}},
+    video_sharpness=                     {prefix='VTM',command='?VTM',        enabled=true,services={[default_service]={var='video_sharpness'               ,convert=conv_number_base50}}},
+    video_brightness=                    {prefix='VTN',command='?VTN',        enabled=true,services={[default_service]={var='video_brightness'              ,convert=conv_number_base50}}},
+    video_contrast=                      {prefix='VTO',command='?VTO',        enabled=true,services={[default_service]={var='video_contrast'                ,convert=conv_number_base50}}},
+    video_hue=                           {prefix='VTP',command='?VTP',        enabled=true,services={[default_service]={var='video_hue'                     ,convert=conv_number_base50}}},
+    video_chroma_level=                  {prefix='VTQ',command='?VTQ',        enabled=true,services={[default_service]={var='video_chroma_level'            ,convert=conv_number_base50}}},
+    video_black_setup=                   {prefix='VTR',command='?VTR',        enabled=true,services={[default_service]={var='video_black_setup'             ,convert=conv_video_black_setup}}},
+    video_aspect=                        {prefix='VTS',command='?VTS',        enabled=true,services={[default_service]={var='video_aspect'                  ,convert=conv_video_aspect}}}
 
 }
 

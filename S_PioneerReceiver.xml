@@ -6,6 +6,8 @@
 	</specVersion>
 
 	<serviceStateTable>
+	
+		<stateVariable><name>Command timeout ms</name>			<sendEventsAttribute>no</sendEventsAttribute>			<dataType>integer</dataType>			<shortCode>command_timeout_ms</shortCode>			<defaultValue>200</defaultValue>		</stateVariable>
 		<stateVariable>
 			<name>QueueDelay_ms</name>
 			<sendEventsAttribute>no</sendEventsAttribute>
@@ -13,6 +15,105 @@
 			<shortCode>QueueDelay_ms</shortCode>
 			<defaultValue>200</defaultValue>
 		</stateVariable>
+		<stateVariable><name>mcacc_memory</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>mcacc_memory</shortCode></stateVariable>
+		<stateVariable><name>virtual_sb</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>virtual_sb</shortCode></stateVariable>
+		<stateVariable><name>virtual_height</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>virtual_height</shortCode></stateVariable>
+		<stateVariable><name>sound_retriever</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>sound_retriever</shortCode></stateVariable>
+		<stateVariable><name>signal_select</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>signal_select</shortCode></stateVariable>
+		<stateVariable><name>analog_input_att</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>analog_input_att</shortCode></stateVariable>
+		<stateVariable><name>eq_status</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>eq_status</shortCode></stateVariable>
+		<stateVariable><name>standing_wave</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>standing_wave</shortCode></stateVariable>
+		<stateVariable><name>phase_control_plus</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>phase_control_plus</shortCode></stateVariable>
+		<stateVariable><name>sound_delay</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>sound_delay</shortCode></stateVariable>
+		<stateVariable><name>digital_noise_reduction</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>digital_noise_reduction</shortCode></stateVariable>
+		<stateVariable><name>dialog_enhacement</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>dialog_enhacement</shortCode></stateVariable>
+		<stateVariable><name>hi_bit</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>hi_bit</shortCode></stateVariable>
+		<stateVariable><name>dual_mono</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>dual_mono</shortCode></stateVariable>
+		<stateVariable><name>fixed_pcm</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>fixed_pcm</shortCode></stateVariable>
+		<stateVariable><name>drc</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>drc</shortCode></stateVariable>
+		<stateVariable><name>lfe_att</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>lfe_att</shortCode></stateVariable>
+		<stateVariable><name>sacd_gain</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>sacd_gain</shortCode></stateVariable>
+		<stateVariable><name>auto_delay</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>auto_delay</shortCode></stateVariable>
+		<stateVariable><name>center_width_pl2_music_option</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>center_width_pl2_music_option</shortCode></stateVariable>
+		<stateVariable><name>panorama_pl2_music_option</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>panorama_pl2_music_option</shortCode></stateVariable>
+		<stateVariable><name>dimension_pl2_music_option</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>dimension_pl2_music_option</shortCode></stateVariable>
+		<stateVariable><name>center_image_neo_option</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>center_image_neo_option</shortCode></stateVariable>
+		<stateVariable><name>effect</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>effect</shortCode></stateVariable>
+		<stateVariable><name>height_gain_pl2z_height_option</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>height_gain_pl2z_height_option</shortCode></stateVariable>
+		<stateVariable><name>virtual_depth</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>virtual_depth</shortCode></stateVariable>
+		<stateVariable><name>digital_filter</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>digital_filter</shortCode></stateVariable>
+		<stateVariable><name>loudness_management</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>loudness_management</shortCode></stateVariable>
+		<stateVariable><name>virtual_wide</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>virtual_wide</shortCode></stateVariable>
+		<stateVariable><name>ch_level</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level</shortCode></stateVariable>
+		<stateVariable><name>ch_level_L</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_L</shortCode></stateVariable>
+		<stateVariable><name>ch_level_R</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_R</shortCode></stateVariable>
+		<stateVariable><name>ch_level_C</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_C</shortCode></stateVariable>
+		<stateVariable><name>ch_level_SL</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_SL</shortCode></stateVariable>
+		<stateVariable><name>ch_level_SR</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_SR</shortCode></stateVariable>
+		<stateVariable><name>ch_level_SBL</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_SBL</shortCode></stateVariable>
+		<stateVariable><name>ch_level_SBR</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_SBR</shortCode></stateVariable>
+		<stateVariable><name>ch_level_SW</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_SW</shortCode></stateVariable>
+		<stateVariable><name>ch_level_LH</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_LH</shortCode></stateVariable>
+		<stateVariable><name>ch_level_RH</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_RH</shortCode></stateVariable>
+		<stateVariable><name>ch_level_LW</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_LW</shortCode></stateVariable>
+		<stateVariable><name>ch_level_RW</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>ch_level_RW</shortCode></stateVariable>
+		<stateVariable><name>amp_speakers</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>amp_speakers</shortCode></stateVariable>
+		<stateVariable><name>amp_hdmi_output</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>amp_hdmi_output</shortCode></stateVariable>
+		<stateVariable><name>amp_hdmi_audio</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>amp_hdmi_audio</shortCode></stateVariable>
+		<stateVariable><name>amp_pqls_setting</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>amp_pqls_setting</shortCode></stateVariable>
+		<stateVariable><name>amp_sleep_remain_time</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>amp_sleep_remain_time</shortCode></stateVariable>
+		<stateVariable><name>amp</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>amp</shortCode></stateVariable>
+		<stateVariable><name>panel_key_lock</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>panel_key_lock</shortCode></stateVariable>
+		<stateVariable><name>remote_lock</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>remote_lock</shortCode></stateVariable>
+		<stateVariable><name>video_converter</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_converter</shortCode></stateVariable>
+		<stateVariable><name>video_resolution</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_resolution</shortCode></stateVariable>
+		<stateVariable><name>video_pure_cinema</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_pure_cinema</shortCode></stateVariable>
+		<stateVariable><name>video_prog_motion</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_prog_motion</shortCode></stateVariable>
+		<stateVariable><name>video_stream_smoother</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_stream_smoother</shortCode></stateVariable>
+		<stateVariable><name>video_advanced_video_adjust</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_advanced_video_adjust</shortCode></stateVariable>
+		<stateVariable><name>video_ynr</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_ynr</shortCode></stateVariable>
+		<stateVariable><name>video_cnr</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_cnr</shortCode></stateVariable>
+		<stateVariable><name>video_bnr</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_bnr</shortCode></stateVariable>
+		<stateVariable><name>video_mnr</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_mnr</shortCode></stateVariable>
+		<stateVariable><name>video_detail</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_detail</shortCode></stateVariable>
+		<stateVariable><name>video_sharpness</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_sharpness</shortCode></stateVariable>
+		<stateVariable><name>video_brightness</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_brightness</shortCode></stateVariable>
+		<stateVariable><name>video_contrast</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_contrast</shortCode></stateVariable>
+		<stateVariable><name>video_hue</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_hue</shortCode></stateVariable>
+		<stateVariable><name>video_chroma_level</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_chroma_level</shortCode></stateVariable>
+		<stateVariable><name>video_black_setup</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_black_setup</shortCode></stateVariable>
+		<stateVariable><name>video_aspect</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType><shortCode>video_aspect</shortCode></stateVariable>
+		<stateVariable><name>Zone2Volume</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone2Volume</shortCode></stateVariable>
+		<stateVariable><name>Zone2VolumePct</name><sendEventsAttribute>no</sendEventsAttribute><dataType>integer</dataType> <shortCode>Zone2VolumePct</shortCode></stateVariable>
+		<stateVariable><name>Zone2Mute</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone2Mute</shortCode></stateVariable>
+		<stateVariable><name>Zone2Input</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone2Input</shortCode></stateVariable>
+		<stateVariable><name>Zone2Power</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone2Power</shortCode></stateVariable>
+		<stateVariable><name>Zone2Tone</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone2Tone</shortCode></stateVariable>
+		<stateVariable><name>Zone2Bass</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone2Bass</shortCode></stateVariable>
+		<stateVariable><name>Zone2Treble</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone2Treble</shortCode></stateVariable>
+		<stateVariable><name>Zone2ChL_Level</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>	<shortCode>Zone2ChL_Level</shortCode></stateVariable>
+		<stateVariable><name>Zone2ChR_Level</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>	<shortCode>Zone2ChR_Level</shortCode></stateVariable>
+		<stateVariable><name>Zone3Volume</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone3Volume</shortCode></stateVariable>
+		<stateVariable><name>Zone3VolumePct</name><sendEventsAttribute>no</sendEventsAttribute><dataType>integer</dataType> <shortCode>Zone3VolumePct</shortCode></stateVariable>
+		<stateVariable><name>Zone3Mute</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone3Mute</shortCode></stateVariable>
+		<stateVariable><name>Zone3Input</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone3Input</shortCode></stateVariable>
+		<stateVariable><name>Zone3Power</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone3Power</shortCode></stateVariable>
+		<stateVariable><name>Zone3Tone</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone3Tone</shortCode></stateVariable>
+		<stateVariable><name>Zone3Bass</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone3Bass</shortCode></stateVariable>
+		<stateVariable><name>Zone3Treble</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone3Treble</shortCode></stateVariable>
+		<stateVariable><name>Zone3ChL_Level</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>	<shortCode>Zone3ChL_Level</shortCode></stateVariable>
+		<stateVariable><name>Zone3ChR_Level</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>	<shortCode>Zone3ChR_Level</shortCode></stateVariable>
+		<stateVariable><name>Zone4Volume</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone4Volume</shortCode></stateVariable>
+		<stateVariable><name>Zone4VolumePct</name><sendEventsAttribute>no</sendEventsAttribute><dataType>integer</dataType> <shortCode>Zone4VolumePct</shortCode></stateVariable>
+		<stateVariable><name>Zone4Mute</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone4Mute</shortCode></stateVariable>
+		<stateVariable><name>Zone4Input</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone4Input</shortCode></stateVariable>
+		<stateVariable><name>Zone4Power</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone4Power</shortCode></stateVariable>
+		<stateVariable><name>Zone4Tone</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone4Tone</shortCode></stateVariable>
+		<stateVariable><name>Zone4Bass</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone4Bass</shortCode></stateVariable>
+		<stateVariable><name>Zone4Treble</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>		<shortCode>Zone4Treble</shortCode></stateVariable>
+		<stateVariable><name>Zone4ChL_Level</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>	<shortCode>Zone4ChL_Level</shortCode></stateVariable>
+		<stateVariable><name>Zone4ChR_Level</name><sendEventsAttribute>no</sendEventsAttribute><dataType>string</dataType>	<shortCode>Zone4ChR_Level</shortCode></stateVariable>
+
 		<stateVariable>
 			<name>VolumePct</name>
 			<sendEventsAttribute>no</sendEventsAttribute>
@@ -103,67 +204,7 @@
 			<dataType>string</dataType>
 			<shortCode>TunerFreq</shortCode>
 		</stateVariable>
-		<stateVariable>
-			<name>Zone3Mute</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>string</dataType>
-			<shortCode>Zone3Mute</shortCode>
-		</stateVariable>
-		<stateVariable>
-			<name>Zone3Volume</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>string</dataType>
-			<shortCode>Zone3Volume</shortCode>
-		</stateVariable>
-		<stateVariable>
-			<name>Zone3VolumePct</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>integer</dataType>
-			<shortCode>Zone3VolumePct</shortCode>
-		</stateVariable>		
-		<stateVariable>
-			<name>Zone3Input</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>string</dataType>
-			<shortCode>Zone3Input</shortCode>
-		</stateVariable>
-		<stateVariable>
-			<name>Zone3Power"</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>string</dataType>
-			<shortCode>Zone3Power"</shortCode>
-		</stateVariable>
-		<stateVariable>
-			<name>Zone2Mute</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>string</dataType>
-			<shortCode>Zone2Mute</shortCode>
-		</stateVariable>
-		<stateVariable>
-			<name>Zone2Volume</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>string</dataType>
-			<shortCode>Zone2Volume</shortCode>
-		</stateVariable>
-		<stateVariable>
-			<name>Zone2VolumePct</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>integer</dataType>
-			<shortCode>Zone2VolumePct</shortCode>
-		</stateVariable>		
-		<stateVariable>
-			<name>Zone2Input</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>string</dataType>
-			<shortCode>Zone2Input</shortCode>
-		</stateVariable>
-		
-		<stateVariable>
-			<name>Zone2Power</name>
-			<sendEventsAttribute>no</sendEventsAttribute>
-			<dataType>string</dataType>
-			<shortCode>Zone2Power</shortCode>
-		</stateVariable>
+
 		<stateVariable>
 			<name>Source</name>
 			<sendEventsAttribute>no</sendEventsAttribute>
